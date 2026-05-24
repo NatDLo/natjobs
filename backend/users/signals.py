@@ -1,4 +1,6 @@
-"""Signal handlers that auto-create role-specific profiles on user creation."""
+"""
+Signal handlers that auto-create role-specific profiles on user creation.
+"""
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -13,6 +15,7 @@ def create_user_profile(sender, instance, created, **kwargs):
      - If the user is a recruiter, it creates a RecruiterProfile.
     This ensures that every user has a corresponding profile that can store additional information specific to their role.
     """
+    
     if created:
         if instance.role == 'seeker':
             SeekerProfile.objects.create(user=instance)

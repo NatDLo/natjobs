@@ -1,4 +1,6 @@
-"""User and role-specific profile models (recruiter/seeker)."""
+"""
+User and role-specific profile models (recruiter/seeker).
+"""
 
 
 from django.contrib.auth.models import AbstractUser

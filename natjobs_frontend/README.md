@@ -1,59 +1,95 @@
-# NatjobsFrontend
+# NatJobs Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.4.
+Angular frontend for NatJobs, a recruitment platform connecting recruiters and seekers through job posts, applications, resumes, and real-time chat.
 
-## Development server
+## Features
 
-To start a local development server, run:
+- JWT-based login and registration flow
+- Route guards for authenticated and guest users
+- Role-aware views (recruiter vs seeker)
+- Job list and job detail pages
+- Job applicants page for recruiters
+- Applications page for seekers
+- Profile, edit profile, and public profile pages
+- Real-time chat using WebSocket
+- Local API and WS proxy for development
 
-```bash
-ng serve
-```
+## Tech Stack
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- Angular 21
+- TypeScript
+- RxJS
+- Vitest
+- Angular CLI
 
-## Code scaffolding
+## Routes
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### Public routes
+- /auth/login
+- /auth/register
 
-```bash
-ng generate component component-name
-```
+### Protected routes
+- /
+- /jobs/:id
+- /jobs/:id/applications
+- /applications
+- /profile
+- /profile/edit
+- /users/:id
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## API and WebSocket Integration
 
-```bash
-ng generate --help
-```
+- API base path: /api
+- WebSocket base path: /ws
 
-## Building
+Proxy config (development):
+- /api -> http://127.0.0.1:8000
+- /ws -> http://127.0.0.1:8000 (ws enabled)
 
-To build the project run:
+This lets frontend and backend run on different ports without CORS issues during development.
 
-```bash
-ng build
-```
+## Local Development
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Requirements:
+- Node.js 20+
+- npm 10+
 
-## Running unit tests
+Install:
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+    npm install
 
-```bash
-ng test
-```
+Run dev server:
 
-## Running end-to-end tests
+    npm start
 
-For end-to-end (e2e) testing, run:
+Frontend URL:
+- http://localhost:4200
 
-```bash
-ng e2e
-```
+Build:
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+    npm run build
 
-## Additional Resources
+Tests:
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+    npm test
+
+## Scripts
+
+- npm start
+- npm run build
+- npm run watch
+- npm test
+
+## Recommended Workflow
+
+1. Start backend on port 8000
+2. Start frontend on port 4200
+3. Login as recruiter or seeker
+4. Validate main flows:
+   - Recruiter creates jobs
+   - Seeker creates resume and applies to jobs
+   - Both users open a conversation and chat in real time
+
+## License
+
+Natali

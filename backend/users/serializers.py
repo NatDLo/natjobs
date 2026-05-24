@@ -1,4 +1,6 @@
-"""Serializers for registration, profile retrieval, and profile updates."""
+"""
+Serializers for registration, profile retrieval, and profile updates.
+"""
 
 from rest_framework import serializers
 from resumes.models import Resume

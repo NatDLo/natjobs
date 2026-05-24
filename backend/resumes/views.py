@@ -83,6 +83,10 @@ class ResumeDetailView(SeekerOnlyMixin, generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        """
+        Ensure we only operate on the authenticated seeker's resume.
+        """
+
         return Resume.objects.filter(user=self.request.user).prefetch_related(
             "skills",
             "languages",
@@ -100,6 +104,10 @@ class SkillListCreateView(SeekerOnlyMixin, generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_resume(self):
+        """
+        Retrieve the authenticated seeker's resume based on the resume_id URL parameter.
+        """
+
         return get_object_or_404(
             Resume,
             pk=self.kwargs["resume_id"],
@@ -107,9 +115,17 @@ class SkillListCreateView(SeekerOnlyMixin, generics.ListCreateAPIView):
         )
 
     def get_queryset(self):
+        """
+        Ensure we only operate on skills belonging to the authenticated seeker's resume.
+        """
+
         return Skill.objects.filter(resume=self.get_resume())
 
     def perform_create(self, serializer):
+        """
+        Automatically associate the new skill with the authenticated seeker's resume.
+        :var serializer: The serializer instance for the skill being created.
+        """
         serializer.save(resume=self.get_resume())
 
 
@@ -122,6 +138,10 @@ class SkillUpdateView(SeekerOnlyMixin, generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        """
+        Ensure we only operate on skills belonging to the authenticated seeker's resume.
+        """
+
         return Skill.objects.filter(resume__user=self.request.user)
 
 
@@ -134,6 +154,10 @@ class LanguageListCreateView(SeekerOnlyMixin, generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_resume(self):
+        """
+        Retrieve the authenticated seeker's resume based on the resume_id URL parameter.
+        """
+
         return get_object_or_404(
             Resume,
             pk=self.kwargs["resume_id"],
@@ -141,9 +165,18 @@ class LanguageListCreateView(SeekerOnlyMixin, generics.ListCreateAPIView):
         )
 
     def get_queryset(self):
+        """
+        Ensure we only operate on languages belonging to the authenticated seeker's resume.
+        """
+
         return Language.objects.filter(resume=self.get_resume())
 
     def perform_create(self, serializer):
+        """
+        Automatically associate the new language with the authenticated seeker's resume.
+        :var serializer: The serializer instance for the language being created.
+        """
+
         serializer.save(resume=self.get_resume())
 
 
@@ -156,6 +189,10 @@ class LanguageUpdateView(SeekerOnlyMixin, generics.RetrieveUpdateDestroyAPIView)
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        """
+        Ensure we only operate on languages belonging to the authenticated seeker's resume.
+        """
+
         return Language.objects.filter(resume__user=self.request.user)
 
 
@@ -168,6 +205,10 @@ class ExperienceListCreateView(SeekerOnlyMixin, generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_resume(self):
+        """
+        Retrieve the authenticated seeker's resume based on the resume_id URL parameter.
+        """
+
         return get_object_or_404(
             Resume,
             pk=self.kwargs["resume_id"],
@@ -175,9 +216,18 @@ class ExperienceListCreateView(SeekerOnlyMixin, generics.ListCreateAPIView):
         )
 
     def get_queryset(self):
+        """
+        Ensure we only operate on experience entries belonging to the authenticated seeker's resume.
+        """
+
         return Experience.objects.filter(resume=self.get_resume())
 
     def perform_create(self, serializer):
+        """
+        Automatically associate the new experience entry with the authenticated seeker's resume.
+        :var serializer: The serializer instance for the experience entry being created.
+        """
+        
         serializer.save(resume=self.get_resume())
 
 
@@ -190,6 +240,10 @@ class ExperienceUpdateView(SeekerOnlyMixin, generics.RetrieveUpdateDestroyAPIVie
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        """
+        Ensure we only operate on experience entries belonging to the authenticated seeker's resume.
+        """
+
         return Experience.objects.filter(resume__user=self.request.user)
 
 
@@ -202,6 +256,10 @@ class EducationListCreateView(SeekerOnlyMixin, generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_resume(self):
+        """
+        Retrieve the authenticated seeker's resume based on the resume_id URL parameter.
+        """
+
         return get_object_or_404(
             Resume,
             pk=self.kwargs["resume_id"],
@@ -209,9 +267,18 @@ class EducationListCreateView(SeekerOnlyMixin, generics.ListCreateAPIView):
         )
 
     def get_queryset(self):
+        """
+        Ensure we only operate on education entries belonging to the authenticated seeker's resume.
+        """
+
         return Education.objects.filter(resume=self.get_resume())
 
     def perform_create(self, serializer):
+        """
+        Automatically associate the new education entry with the authenticated seeker's resume.
+        :var serializer: The serializer instance for the education entry being created.
+        """
+
         serializer.save(resume=self.get_resume())
 
 
@@ -224,4 +291,8 @@ class EducationUpdateView(SeekerOnlyMixin, generics.RetrieveUpdateDestroyAPIView
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        """
+        Ensure we only operate on education entries belonging to the authenticated seeker's resume.
+        """
+        
         return Education.objects.filter(resume__user=self.request.user)

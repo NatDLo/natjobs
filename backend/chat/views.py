@@ -23,6 +23,10 @@ class ConversationListView(generics.ListAPIView):
     serializer_class = ConversationSerializer
 
     def get_queryset(self):
+        """
+        Return conversations where the authenticated user is either the recruiter or the seeker.
+        """
+        
         user = self.request.user
 
         return Conversation.objects.filter(
@@ -81,6 +85,10 @@ class ConversationDetailView(generics.RetrieveAPIView):
     serializer_class = ConversationSerializer
 
     def get_queryset(self):
+        """
+        Return conversations where the authenticated user is either the recruiter or the seeker.
+        """
+
         user = self.request.user
 
         return Conversation.objects.filter(

@@ -38,6 +38,10 @@ class JwtAuthMiddleware:
         self.app = app
 
     async def __call__(self, scope, receive, send):
+        """
+        Authenticate the user based on the JWT token in the query string and attach it to the scope.
+        """
+        
         scope["user"] = AnonymousUser()
 
         query_string = scope.get("query_string", b"").decode("utf-8")

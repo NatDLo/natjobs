@@ -37,6 +37,7 @@ class JobListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         """
         Ensure only recruiters can create jobs, and set the recruiter field to the current user.
+        :var serializer: The serializer instance for the job being created.
         """
 
         if self.request.user.role != "recruiter":

@@ -1,3 +1,7 @@
+"""
+URL patterns for user-related endpoints, including registration, profile retrieval, and profile updates.
+"""
+
 from django.urls import path
 from .views import MeView, RegisterView, UserPublicProfileView
 

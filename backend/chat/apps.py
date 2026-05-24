@@ -1,3 +1,7 @@
+"""
+Configuration for the chat app.
+"""
+
 from django.apps import AppConfig
 
 

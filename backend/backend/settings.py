@@ -1,3 +1,11 @@
+"""
+Global Django settings for the NatJobs backend.
+
+This project serves a REST API and WebSocket chat for a recruiting platform.
+Environment variables control security, debug mode, allowed hosts, and optional Redis
+integration for channel layers and caching.
+"""
+
 import os
 from pathlib import Path
 

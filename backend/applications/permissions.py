@@ -1,3 +1,8 @@
+"""
+Custom permission enforcing seeker-only access where required.
+This permission class checks if the authenticated user has a role of 'seeker' to allow access to certain views.
+"""
+
 from rest_framework.permissions import BasePermission
 
 

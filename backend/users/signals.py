@@ -1,3 +1,5 @@
+"""Signal handlers that auto-create role-specific profiles on user creation."""
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .models import User, SeekerProfile, RecruiterProfile

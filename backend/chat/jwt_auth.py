@@ -1,3 +1,9 @@
+"""
+Custom Channels middleware to authenticate WebSocket connections via JWT query token.
+This middleware extracts the JWT token from the query string of the WebSocket connection,
+validates it, and attaches the corresponding user to the connection scope for use in chat consumers.
+"""
+
 from urllib.parse import parse_qs
 
 from channels.db import database_sync_to_async
@@ -8,6 +14,11 @@ from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 
 @database_sync_to_async
 def _get_user_from_token(token: str):
+    """
+    Validate the JWT token and return the associated user.
+    If the token is invalid or expired, return an AnonymousUser.
+    """
+
     jwt_auth = JWTAuthentication()
     try:
         validated_token = jwt_auth.get_validated_token(token)
@@ -17,6 +28,12 @@ def _get_user_from_token(token: str):
 
 
 class JwtAuthMiddleware:
+    """
+    Custom middleware for JWT authentication in Channels.
+    Extracts the token from the query string, validates it, and attaches the user to the scope.
+    If the token is invalid or missing, the user will be set to AnonymousUser.
+    """ 
+    
     def __init__(self, app):
         self.app = app
 
@@ -34,4 +51,8 @@ class JwtAuthMiddleware:
 
 
 def JwtAuthMiddlewareStack(inner):
+    """
+    Helper function to apply the JWT authentication middleware to the Channels application stack.
+    """
+
     return JwtAuthMiddleware(inner)

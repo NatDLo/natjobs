@@ -1,3 +1,5 @@
+"""Custom DRF permission classes for job-related actions."""
+
 from rest_framework.permissions import BasePermission
 
 

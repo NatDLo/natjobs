@@ -1,3 +1,10 @@
+"""
+Seeker-only resume CRUD and nested resource management endpoints.
+Shared role gate for all resume endpoints via SeekerOnlyMixin.
+Prevent duplicate resumes per user in ResumeListCreateView.
+Always scope resume and nested resource queries to the authenticated user to ensure data isolation and security.
+"""
+
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, permissions
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -13,6 +20,10 @@ from .serializers import (
 
 
 class SeekerOnlyMixin:
+    """
+    Mixin to restrict access to seekers only for resume-related views.
+    """
+
     def initial(self, request, *args, **kwargs):
         super().initial(request, *args, **kwargs)
         if request.user.role != "seeker":
@@ -20,6 +31,11 @@ class SeekerOnlyMixin:
 
 
 class ResumeListCreateView(SeekerOnlyMixin, generics.ListCreateAPIView):
+    """
+    List and create resume for the authenticated seeker.
+    Each seeker can only have one resume, enforced in perform_create.
+    """
+    
     serializer_class = ResumeSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -39,6 +55,10 @@ class ResumeListCreateView(SeekerOnlyMixin, generics.ListCreateAPIView):
 
 
 class ResumeMeView(SeekerOnlyMixin, generics.RetrieveUpdateAPIView):
+    """
+    Retrieve and update the authenticated seeker's resume.
+    """
+    
     serializer_class = ResumeSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -55,6 +75,10 @@ class ResumeMeView(SeekerOnlyMixin, generics.RetrieveUpdateAPIView):
 
 
 class ResumeDetailView(SeekerOnlyMixin, generics.RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update, and delete the authenticated seeker's resume.
+    """
+    
     serializer_class = ResumeSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -68,6 +92,10 @@ class ResumeDetailView(SeekerOnlyMixin, generics.RetrieveUpdateDestroyAPIView):
 
 
 class SkillListCreateView(SeekerOnlyMixin, generics.ListCreateAPIView):
+    """
+    List and create skills for the authenticated seeker's resume.
+    """
+    
     serializer_class = SkillSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -86,6 +114,10 @@ class SkillListCreateView(SeekerOnlyMixin, generics.ListCreateAPIView):
 
 
 class SkillUpdateView(SeekerOnlyMixin, generics.RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update, and delete a skill for the authenticated seeker's resume.
+    """
+
     serializer_class = SkillSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -94,6 +126,10 @@ class SkillUpdateView(SeekerOnlyMixin, generics.RetrieveUpdateDestroyAPIView):
 
 
 class LanguageListCreateView(SeekerOnlyMixin, generics.ListCreateAPIView):
+    """
+    List and create languages for the authenticated seeker's resume.
+    """
+
     serializer_class = LanguageSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -112,6 +148,10 @@ class LanguageListCreateView(SeekerOnlyMixin, generics.ListCreateAPIView):
 
 
 class LanguageUpdateView(SeekerOnlyMixin, generics.RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update, and delete a language for the authenticated seeker's resume.
+    """
+    
     serializer_class = LanguageSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -120,6 +160,10 @@ class LanguageUpdateView(SeekerOnlyMixin, generics.RetrieveUpdateDestroyAPIView)
 
 
 class ExperienceListCreateView(SeekerOnlyMixin, generics.ListCreateAPIView):
+    """
+    List and create work experience entries for the authenticated seeker's resume.
+    """
+    
     serializer_class = ExperienceSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -138,6 +182,10 @@ class ExperienceListCreateView(SeekerOnlyMixin, generics.ListCreateAPIView):
 
 
 class ExperienceUpdateView(SeekerOnlyMixin, generics.RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update, and delete a work experience entry for the authenticated seeker's resume.
+    """
+    
     serializer_class = ExperienceSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -146,6 +194,10 @@ class ExperienceUpdateView(SeekerOnlyMixin, generics.RetrieveUpdateDestroyAPIVie
 
 
 class EducationListCreateView(SeekerOnlyMixin, generics.ListCreateAPIView):
+    """
+    List and create education entries for the authenticated seeker's resume.
+    """
+    
     serializer_class = EducationSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -164,6 +216,10 @@ class EducationListCreateView(SeekerOnlyMixin, generics.ListCreateAPIView):
 
 
 class EducationUpdateView(SeekerOnlyMixin, generics.RetrieveUpdateDestroyAPIView):
+    """
+    Retrieve, update, and delete an education entry for the authenticated seeker's resume.
+    """
+    
     serializer_class = EducationSerializer
     permission_classes = [permissions.IsAuthenticated]
 

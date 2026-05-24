@@ -1,3 +1,5 @@
+"""URL routes for user registration and profile endpoints."""
+
 from django.apps import AppConfig
 
 

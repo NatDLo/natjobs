@@ -1,8 +1,17 @@
+"""
+Serializers for resume aggregate and nested resume entities.
+Nesteed fields are read-only and managed via separate endpoints for skills, languages, experience, and education.
+"""
+
 from rest_framework import serializers
 from .models import Resume, Skill, Language, Experience, Education
 
 
 class SkillSerializer(serializers.ModelSerializer):
+    """
+    Serializer for a candidate's skill with proficiency level.
+    """
+
     class Meta:
         model = Skill
         fields = [
@@ -15,6 +24,10 @@ class SkillSerializer(serializers.ModelSerializer):
 
 
 class LanguageSerializer(serializers.ModelSerializer):
+    """
+    Serializer for a candidate's language proficiency.
+    """
+    
     class Meta:
         model = Language
         fields = [
@@ -27,6 +40,10 @@ class LanguageSerializer(serializers.ModelSerializer):
 
 
 class ExperienceSerializer(serializers.ModelSerializer):
+    """
+    Serializer for a candidate's work experience.
+    """
+
     class Meta:
         model = Experience
         fields = [
@@ -42,6 +59,10 @@ class ExperienceSerializer(serializers.ModelSerializer):
 
 
 class EducationSerializer(serializers.ModelSerializer):
+    """
+    Serializer for a candidate's educational background.
+    """
+
     class Meta:
         model = Education
         fields = [
@@ -56,6 +77,10 @@ class EducationSerializer(serializers.ModelSerializer):
 
 
 class ResumeSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Resume aggregate, including nested read-only fields for skills, languages, experience, and education.
+    """
+
     skills = SkillSerializer(many=True, read_only=True)
     languages = LanguageSerializer(many=True, read_only=True)
     experiences = ExperienceSerializer(many=True, read_only=True)

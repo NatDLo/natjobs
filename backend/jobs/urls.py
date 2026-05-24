@@ -1,3 +1,7 @@
+"""
+URL routes for job listing, detail, updates, and recruiter-side applications view.
+"""
+
 from django.urls import path
 from .views import JobListCreateView, JobDetailView, JobUpdateView, JobApplicationsView
 

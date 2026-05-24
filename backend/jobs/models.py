@@ -1,7 +1,13 @@
+"""Job posting model owned by recruiter users."""
+
 from django.db import models
 from django.conf import settings
 
 class Job(models.Model):
+    """
+    Model representing a job posting created by a recruiter user.
+    """
+    
     STATUS_CHOICES = [
         ('open', 'Open'),
         ('closed', 'Closed'),

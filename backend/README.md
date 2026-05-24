@@ -127,7 +127,6 @@ Backend URL:
 
 - Authentication is required for most endpoints
 - Role-based permissions are enforced in views
-- Chatbot app exists but currently has no exposed API behavior
 
 ## License
 

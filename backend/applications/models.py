@@ -1,9 +1,18 @@
+"""
+Job application model linking seeker, job, and submitted resume.
+Includes application status and optional notes for tracking the application process.
+"""
+
 from django.db import models
 from django.conf import settings
 from jobs.models import Job
 from resumes.models import Resume
 
 class Application(models.Model):
+    """
+    Model representing a job application submitted by a seeker.
+    Links the seeker, the job, and the resume used for the application.
+    """
 
     STATUS_CHOICES = [
         ('applied', 'Applied'),

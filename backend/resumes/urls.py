@@ -1,3 +1,7 @@
+"""
+URL routes for resume root endpoints and nested resume resources.
+"""
+
 from django.urls import path
 from .views import (
     ResumeListCreateView,

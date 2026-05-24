@@ -1,3 +1,10 @@
+"""
+ASGI application entrypoint.
+
+HTTP traffic is handled by Django; WebSocket traffic is routed through Channels
+with JWT query-token authentication middleware.
+"""
+
 import os
 
 from channels.routing import ProtocolTypeRouter, URLRouter

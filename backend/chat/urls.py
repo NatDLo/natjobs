@@ -1,3 +1,8 @@
+"""
+HTTP URL routes for conversation resources.
+Only authenticated users can access these endpoints, and they can only see conversations they are a part of.
+"""
+
 from django.urls import path
 from .views import (ConversationListView, ConversationCreateView, ConversationDetailView)
 

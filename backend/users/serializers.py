@@ -1,3 +1,5 @@
+"""Serializers for registration, profile retrieval, and profile updates."""
+
 from rest_framework import serializers
 from resumes.models import Resume
 from resumes.serializers import ResumeSerializer
@@ -5,6 +7,11 @@ from .models import RecruiterProfile, SeekerProfile, User
 
 
 class SeekerProfileSerializer(serializers.ModelSerializer):
+    """
+    Serializer for job seeker profiles, including nested resume data.
+    The resume field is read-only and retrieves the associated Resume object for the seeker.
+    """
+
     resume = serializers.SerializerMethodField()
 
     class Meta:
@@ -23,6 +30,10 @@ class SeekerProfileSerializer(serializers.ModelSerializer):
 
 
 class RecruiterProfileSerializer(serializers.ModelSerializer):
+    """Serializer for recruiter profiles, including the company name.
+    The company_name field is editable for recruiters and read-only for job seekers.
+    """ 
+    
     class Meta:
         model = RecruiterProfile
         fields = [
@@ -31,6 +42,11 @@ class RecruiterProfileSerializer(serializers.ModelSerializer):
 
 
 class UserPublicProfileSerializer(serializers.ModelSerializer):
+    """
+    Serializer for public user profiles, including nested seeker and recruiter profiles.
+    The seeker_profile and recruiter_profile fields are read-only and conditionally included based on the user's role.
+    """
+
     seeker_profile = serializers.SerializerMethodField()
     recruiter_profile = serializers.SerializerMethodField()
 
@@ -58,6 +74,11 @@ class UserPublicProfileSerializer(serializers.ModelSerializer):
 
 
 class UserMeSerializer(UserPublicProfileSerializer):
+    """
+    Serializer for the authenticated user's own profile, including email.
+    Inherits from UserPublicProfileSerializer and adds the email field, which is only visible to the user themselves.
+    """
+
     class Meta(UserPublicProfileSerializer.Meta):
         fields = UserPublicProfileSerializer.Meta.fields + [
             "email",
@@ -65,6 +86,11 @@ class UserMeSerializer(UserPublicProfileSerializer):
 
 
 class UserMeUpdateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for updating the authenticated user's profile information.
+    Allows updates to first_name, last_name, and company_name (for recruiters).
+    The company_name field is only editable for recruiters and is ignored for job seekers.
+    """
     company_name = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
@@ -77,6 +103,8 @@ class UserMeUpdateSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, attrs):
+        """Ensure that only recruiters can update the company_name field."""
+
         user = self.instance
 
         if user.role == "seeker" and "company_name" in attrs:
@@ -87,6 +115,8 @@ class UserMeUpdateSerializer(serializers.ModelSerializer):
         return attrs
 
     def update(self, instance, validated_data):
+        """Update the user's profile information, including the company name for recruiters."""
+
         company_name = validated_data.pop("company_name", None)
 
         for attr, value in validated_data.items():
@@ -106,6 +136,11 @@ class UserMeUpdateSerializer(serializers.ModelSerializer):
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
+    """
+    Serializer for user registration, including password handling.
+    The password field is write-only and is used to create a new user with the specified role (recruiter or seeker).
+    """
+
     password = serializers.CharField(write_only=True)
 
     class Meta:
@@ -121,6 +156,11 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         ]
 
     def create(self, validated_data):
+        """
+        Create a new user with the provided registration data, including setting the password.
+        The role field determines whether the user is a recruiter or a job seeker.
+        """
+
         user = User(
             username=validated_data["username"],
             email=validated_data["email"],

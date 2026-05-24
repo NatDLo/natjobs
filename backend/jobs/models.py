@@ -1,4 +1,6 @@
-"""Job posting model owned by recruiter users."""
+"""
+Job posting model owned by recruiter users.
+"""
 
 from django.db import models
 from django.conf import settings

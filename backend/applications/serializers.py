@@ -6,7 +6,7 @@ application status by recruiters.
 
 from rest_framework import serializers
 from .models import Application
-
+from jobs.models import Job
 
 class ApplicationJobSerializer(serializers.Serializer):
     """
@@ -26,7 +26,11 @@ class ApplicationSerializer(serializers.ModelSerializer):
     """
     
     job = ApplicationJobSerializer(read_only=True)
-    job_id = serializers.IntegerField(write_only=True, source="job")
+    job_id = serializers.PrimaryKeyRelatedField(
+        source="job",
+        queryset=Job.objects.all(),
+        write_only=True,
+    )
 
     class Meta:
         model = Application

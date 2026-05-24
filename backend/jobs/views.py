@@ -1,4 +1,6 @@
-"""Job endpoints with role-aware querysets and recruiter-only mutations."""
+"""
+Job endpoints with role-aware querysets and recruiter-only mutations.
+"""
 
 from rest_framework import generics, permissions
 from rest_framework.exceptions import PermissionDenied

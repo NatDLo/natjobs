@@ -1,0 +1,85 @@
+:host {
+  display: block;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 20px 56px;
+}
+
+.container h2 {
+  margin: 0 0 20px;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #172033;
+}
+
+.container > p {
+  margin: 0 0 16px;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.job-card {
+  background: #ffffff;
+  border: 1px solid #dbe2ea;
+  border-radius: 18px;
+  padding: 24px;
+  margin-bottom: 18px;
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
+}
+
+.job-card h3 {
+  margin: 0 0 12px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1f2a44;
+}
+
+.job-card p {
+  margin: 0 0 16px;
+  color: #475569;
+  line-height: 1.7;
+}
+
+.job-card button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 12px;
+  padding: 11px 16px;
+  background: #1d4ed8;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.2s ease, background 0.2s ease;
+}
+
+.job-card button:hover {
+  background: #1e40af;
+  transform: translateY(-1px);
+}
+
+.job-card button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 24px 16px 40px;
+  }
+
+  .job-card {
+    padding: 20px;
+    border-radius: 16px;
+  }
+
+  .job-card button {
+    width: 100%;
+  }
+}

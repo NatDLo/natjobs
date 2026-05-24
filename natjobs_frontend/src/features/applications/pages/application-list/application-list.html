@@ -1,0 +1,58 @@
+<div class="container">
+  <header class="page-header">
+    <h2>My Applications</h2>
+    <p class="page-description">
+      Track the status of the jobs you have applied to.
+    </p>
+  </header>
+
+  @if (loading) {
+    <p class="state-message loading-state">Loading applications...</p>
+  }
+
+  @if (error) {
+    <p class="state-message error-state">{{ error }}</p>
+  }
+
+  @if (!loading && !error) {
+    @if (applications.length) {
+      <div class="application-list">
+        @for (app of applications; track app.id) {
+          <article class="application-card">
+            <div class="application-card__header">
+              <h3 class="application-title">
+                {{ app.job.title || app.job }}
+              </h3>
+
+              <span class="status-badge status-{{ app.status }}">
+                {{ app.status }}
+              </span>
+            </div>
+
+            <div class="application-card__body">
+              <p class="application-row">
+                <span class="label">Application ID</span>
+                <span class="value">#{{ app.id }}</span>
+              </p>
+
+              <p class="application-row">
+                <span class="label">Status</span>
+                <span class="value">{{ app.status }}</span>
+              </p>
+            </div>
+
+            <div class="application-card__actions">
+              <a [routerLink]="['/users', app.job.recruiter || app.recruiter]">
+                View recruiter profile
+              </a>
+            </div>
+          </article>
+        }
+      </div>
+    } @else {
+      <p class="state-message empty-state">
+        You have not applied to any jobs yet.
+      </p>
+    }
+  }
+</div>

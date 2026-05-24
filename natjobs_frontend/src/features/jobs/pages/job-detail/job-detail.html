@@ -1,0 +1,36 @@
+@if (error) {
+  <div class="container">
+    <p>{{ error }}</p>
+  </div>
+}
+
+@if (job) {
+  <div class="container">
+    <a [routerLink]="['/users', job.recruiter]">
+      View recruiter profile
+    </a>
+
+    <h2>{{ job.title }}</h2>
+    <p>{{ job.description }}</p>
+
+    @if (isSeeker()) {
+      <button type="button" [disabled]="applying" (click)="apply()">
+        {{ applying ? 'Submitting...' : 'Apply' }}
+      </button>
+
+      <button
+        type="button"
+        [disabled]="startingConversation"
+        (click)="startConversation()"
+      >
+        {{ startingConversation ? 'Starting chat...' : 'Message recruiter' }}
+      </button>
+    }
+
+    @if (isRecruiter()) {
+      <a [routerLink]="['/jobs', job.id, 'applications']">
+        View applicants
+      </a>
+    }
+  </div>
+}

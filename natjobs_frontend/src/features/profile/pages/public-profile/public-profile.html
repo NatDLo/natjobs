@@ -1,0 +1,98 @@
+<div class="profile-page">
+  <h2>Public Profile</h2>
+
+  @if (loading) {
+    <p>Loading profile...</p>
+  }
+
+  @if (error) {
+    <p class="error">{{ error }}</p>
+  }
+
+  @if (profile) {
+    <div class="profile-card">
+      <p><strong>Username:</strong> {{ profile.username }}</p>
+      <p><strong>First name:</strong> {{ profile.first_name || 'Not provided' }}</p>
+      <p><strong>Last name:</strong> {{ profile.last_name || 'Not provided' }}</p>
+      <p><strong>Role:</strong> {{ profile.role }}</p>
+
+      @if (profile.role === 'recruiter') {
+        <hr />
+        <h3>Recruiter Information</h3>
+        <p>
+          <strong>Company name:</strong>
+          {{ profile.recruiter_profile?.company_name || 'Not provided' }}
+        </p>
+      }
+
+      @if (profile.role === 'seeker') {
+        <hr />
+        <h3>Resume</h3>
+
+        @if (profile.seeker_profile?.resume) {
+          <p><strong>Full name:</strong> {{ profile.seeker_profile?.resume?.full_name }}</p>
+          <p><strong>Location:</strong> {{ profile.seeker_profile?.resume?.location }}</p>
+          <p><strong>Bio:</strong> {{ profile.seeker_profile?.resume?.bio || 'Not provided' }}</p>
+          <p>
+            <strong>Availability:</strong>
+            {{ profile.seeker_profile?.resume?.availability || 'Not provided' }}
+          </p>
+          <p>
+            <strong>Mobility:</strong>
+            {{ profile.seeker_profile?.resume?.mobility ? 'Yes' : 'No' }}
+          </p>
+
+          <h4>Skills</h4>
+          @if (profile.seeker_profile?.resume?.skills?.length) {
+            <ul>
+              @for (skill of profile.seeker_profile?.resume?.skills ?? []; track skill.id) {
+                <li>{{ skill.name }} (Level {{ skill.level }})</li>
+              }
+            </ul>
+          } @else {
+            <p>No skills added yet.</p>
+          }
+
+          <h4>Languages</h4>
+          @if (profile.seeker_profile?.resume?.languages?.length) {
+            <ul>
+              @for (language of profile.seeker_profile?.resume?.languages ?? []; track language.id) {
+                <li>{{ language.name }} ({{ language.level }})</li>
+              }
+            </ul>
+          } @else {
+            <p>No languages added yet.</p>
+          }
+
+          <h4>Experience</h4>
+          @if (profile.seeker_profile?.resume?.experiences?.length) {
+            <ul>
+              @for (experience of profile.seeker_profile?.resume?.experiences ?? []; track experience.id) {
+                <li>
+                  <strong>{{ experience.job_title }}</strong> - {{ experience.company }}
+                </li>
+              }
+            </ul>
+          } @else {
+            <p>No experience added yet.</p>
+          }
+
+          <h4>Education</h4>
+          @if (profile.seeker_profile?.resume?.education?.length) {
+            <ul>
+              @for (education of profile.seeker_profile?.resume?.education ?? []; track education.id) {
+                <li>
+                  <strong>{{ education.degree }}</strong> - {{ education.institution }}
+                </li>
+              }
+            </ul>
+          } @else {
+            <p>No education added yet.</p>
+          }
+        } @else {
+          <p>No resume available.</p>
+        }
+      }
+    </div>
+  }
+</div>

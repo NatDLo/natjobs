@@ -1,0 +1,25 @@
+<section class="auth-card">
+  <h2>Login</h2>
+
+  @if (error) {
+    <p class="error">
+      {{ error }}
+    </p>
+  }
+
+  <input
+    [(ngModel)]="form.username"
+    placeholder="Username"
+    type="text"
+  />
+
+  <input
+    [(ngModel)]="form.password"
+    placeholder="Password"
+    type="password"
+  />
+
+  <button type="button" [disabled]="loading" (click)="login()">
+    {{ loading ? 'Signing in...' : 'Sign In' }}
+  </button>
+</section>

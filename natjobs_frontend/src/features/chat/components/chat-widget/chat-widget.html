@@ -1,0 +1,79 @@
+<div class="chat-container">
+  @if (!open) {
+    <button
+      type="button"
+      class="chat-bubble"
+      (click)="toggle()"
+      aria-label="Open chat"
+    >
+      💬
+    </button>
+  }
+
+  @if (open) {
+    <section class="chat-panel">
+      <div class="chat-header">
+        <span>Messages</span>
+        <button type="button" (click)="toggle()" aria-label="Close chat">
+          ✕
+        </button>
+      </div>
+
+      @if (wsError) {
+        <p class="chat-error">{{ wsError }}</p>
+      }
+
+      <div class="chat-body">
+        <div class="chat-list">
+          @if (conversations.length) {
+            @for (c of conversations; track c.id) {
+              <button
+                type="button"
+                class="chat-item"
+                [class.active]="active?.id === c.id"
+                (click)="openConv(c)"
+              >
+                <span>Chat {{ c.id }}</span>
+              </button>
+            }
+          } @else {
+            <p>No conversations yet.</p>
+          }
+        </div>
+
+        <div class="chat-messages">
+          @if (active) {
+            @if (messages.length) {
+              @for (m of messages; track $index) {
+                <div class="message-item">
+                  <b>{{ m.sender }}:</b>
+                  <span>{{ m.content }}</span>
+                </div>
+              }
+            } @else {
+              <p>No messages in this conversation yet.</p>
+            }
+          } @else {
+            <p>Select a conversation to start chatting.</p>
+          }
+        </div>
+      </div>
+
+      <div class="chat-input">
+        <input
+          [(ngModel)]="message"
+          type="text"
+          placeholder="Write a message..."
+          [disabled]="!active || !wsConnected"
+        />
+        <button
+          type="button"
+          (click)="send()"
+          [disabled]="!active || !wsConnected || !message.trim()"
+        >
+          Send
+        </button>
+      </div>
+    </section>
+  }
+</div>

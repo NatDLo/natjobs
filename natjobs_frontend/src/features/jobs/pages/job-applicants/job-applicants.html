@@ -1,0 +1,63 @@
+<div class="container">
+  <h2>Job Applicants</h2>
+
+  @if (loading) {
+    <p>Loading applicants...</p>
+  }
+
+  @if (error) {
+    <p>{{ error }}</p>
+  }
+
+  @if (!loading && !error) {
+    @if (applicants.length) {
+      @for (app of applicants; track app.id) {
+        <div class="job-card">
+          <p><strong>Application ID:</strong> {{ app.id }}</p>
+          <p><strong>Status:</strong> {{ app.status }}</p>
+          <p><strong>Applied at:</strong> {{ app.applied_at }}</p>
+
+          <a [routerLink]="['/users', app.seeker]">
+            View seeker profile
+          </a>
+
+          <div class="actions">
+            <button
+              type="button"
+              [disabled]="updatingId === app.id"
+              (click)="updateStatus(app.id, 'reviewing')"
+            >
+              Move to reviewing
+            </button>
+
+            <button
+              type="button"
+              [disabled]="updatingId === app.id"
+              (click)="updateStatus(app.id, 'interview')"
+            >
+              Move to interview
+            </button>
+
+            <button
+              type="button"
+              [disabled]="updatingId === app.id"
+              (click)="updateStatus(app.id, 'accepted')"
+            >
+              Accept
+            </button>
+
+            <button
+              type="button"
+              [disabled]="updatingId === app.id"
+              (click)="updateStatus(app.id, 'rejected')"
+            >
+              Reject
+            </button>
+          </div>
+        </div>
+      }
+    } @else {
+      <p>No applicants yet.</p>
+    }
+  }
+</div>

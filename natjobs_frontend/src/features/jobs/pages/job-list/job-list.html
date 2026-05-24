@@ -1,0 +1,28 @@
+<div class="container">
+  <h2>Jobs</h2>
+
+  @if (loading) {
+    <p>Loading jobs...</p>
+  }
+
+  @if (error) {
+    <p>{{ error }}</p>
+  }
+
+  @if (!loading && !error) {
+    @if (!jobs.length) {
+      <p>No jobs available yet.</p>
+    }
+
+    @for (job of jobs; track job.id) {
+      <div class="job-card">
+        <h3>{{ job.title }}</h3>
+        <p>{{ job.description }}</p>
+
+        <button type="button" [routerLink]="['/jobs', job.id]">
+          View
+        </button>
+      </div>
+    }
+  }
+</div>

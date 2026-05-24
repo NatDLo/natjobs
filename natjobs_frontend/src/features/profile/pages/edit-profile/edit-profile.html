@@ -1,0 +1,353 @@
+<section class="profile-page">
+  <h2>Edit Profile</h2>
+
+  @if (error) {
+    <p class="error">{{ error }}</p>
+  }
+
+  @if (success) {
+    <p class="success">{{ success }}</p>
+  }
+
+  @if (user()) {
+    <div class="profile-card">
+      <h3>Basic Information</h3>
+
+      <input
+        [(ngModel)]="userForm.first_name"
+        name="first_name"
+        placeholder="First name"
+        type="text"
+      />
+
+      <input
+        [(ngModel)]="userForm.last_name"
+        name="last_name"
+        placeholder="Last name"
+        type="text"
+      />
+
+      <input
+        [(ngModel)]="userForm.email"
+        name="email"
+        placeholder="Email"
+        type="email"
+      />
+
+      @if (isRecruiter()) {
+        <hr />
+        <h3>Recruiter Information</h3>
+
+        <input
+          [(ngModel)]="userForm.company_name"
+          name="company_name"
+          placeholder="Company name"
+          type="text"
+        />
+      }
+
+      @if (isSeeker()) {
+        <hr />
+        <h3>Resume Information</h3>
+
+        <input
+          [(ngModel)]="resumeForm.full_name"
+          name="full_name"
+          placeholder="Full name"
+          type="text"
+        />
+
+        <input
+          [(ngModel)]="resumeForm.location"
+          name="location"
+          placeholder="Location"
+          type="text"
+        />
+
+        <input
+          [(ngModel)]="resumeForm.phone"
+          name="phone"
+          placeholder="Phone"
+          type="text"
+        />
+
+        <textarea
+          [(ngModel)]="resumeForm.bio"
+          name="bio"
+          placeholder="Professional summary"
+          rows="4"
+        ></textarea>
+
+        <input
+          [(ngModel)]="resumeForm.availability"
+          name="availability"
+          placeholder="Availability"
+          type="text"
+        />
+
+        <label>
+          <input
+            [(ngModel)]="resumeForm.mobility"
+            name="mobility"
+            type="checkbox"
+          />
+          Open to mobility
+        </label>
+
+        <div class="actions">
+          <button type="button" [disabled]="loading" (click)="save()">
+            {{ loading ? 'Saving...' : 'Save changes' }}
+          </button>
+        </div>
+
+        <hr />
+        <h3>Skills</h3>
+
+        @if (user()?.seeker_profile?.resume?.skills?.length) {
+          <ul>
+            @for (skill of user()?.seeker_profile?.resume?.skills ?? []; track skill.id) {
+              <li>
+                <span>{{ skill.name }} (Level {{ skill.level }})</span>
+                <button
+                  type="button"
+                  [disabled]="loading"
+                  (click)="deleteSkill(skill.id)"
+                >
+                  Delete
+                </button>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p>No skills added yet.</p>
+        }
+
+        @if (resumeId) {
+          <div class="inline-form">
+            <input
+              [(ngModel)]="skillForm.name"
+              name="skill_name"
+              placeholder="Skill name"
+              type="text"
+            />
+
+            <input
+              [(ngModel)]="skillForm.level"
+              name="skill_level"
+              min="1"
+              max="5"
+              placeholder="Level"
+              type="number"
+            />
+
+            <button type="button" [disabled]="loading" (click)="addSkill()">
+              Add skill
+            </button>
+          </div>
+        } @else {
+          <p>Save your resume first to add skills.</p>
+        }
+
+        <hr />
+        <h3>Languages</h3>
+
+        @if (user()?.seeker_profile?.resume?.languages?.length) {
+          <ul>
+            @for (language of user()?.seeker_profile?.resume?.languages ?? []; track language.id) {
+              <li>
+                <span>{{ language.name }} ({{ language.level }})</span>
+                <button
+                  type="button"
+                  [disabled]="loading"
+                  (click)="deleteLanguage(language.id)"
+                >
+                  Delete
+                </button>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p>No languages added yet.</p>
+        }
+
+        @if (resumeId) {
+          <div class="inline-form">
+            <input
+              [(ngModel)]="languageForm.name"
+              name="language_name"
+              placeholder="Language"
+              type="text"
+            />
+
+            <select [(ngModel)]="languageForm.level" name="language_level">
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+              <option value="native">Native</option>
+            </select>
+
+            <button type="button" [disabled]="loading" (click)="addLanguage()">
+              Add language
+            </button>
+          </div>
+        } @else {
+          <p>Save your resume first to add languages.</p>
+        }
+
+        <hr />
+        <h3>Experience</h3>
+
+        @if (user()?.seeker_profile?.resume?.experiences?.length) {
+          <ul>
+            @for (experience of user()?.seeker_profile?.resume?.experiences ?? []; track experience.id) {
+              <li>
+                <div>
+                  <strong>{{ experience.job_title }}</strong> - {{ experience.company }}
+                </div>
+                <div>
+                  {{ experience.start_date }} - {{ experience.end_date || 'Present' }}
+                </div>
+                <p>{{ experience.description }}</p>
+                <button
+                  type="button"
+                  [disabled]="loading"
+                  (click)="deleteExperience(experience.id)"
+                >
+                  Delete
+                </button>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p>No experience added yet.</p>
+        }
+
+        @if (resumeId) {
+          <div class="stack-form">
+            <input
+              [(ngModel)]="experienceForm.job_title"
+              name="experience_job_title"
+              placeholder="Job title"
+              type="text"
+            />
+
+            <input
+              [(ngModel)]="experienceForm.company"
+              name="experience_company"
+              placeholder="Company"
+              type="text"
+            />
+
+            <label>
+              Start date
+              <input
+                [(ngModel)]="experienceForm.start_date"
+                name="experience_start_date"
+                type="date"
+              />
+            </label>
+
+            <label>
+              End date
+              <input
+                [(ngModel)]="experienceForm.end_date"
+                name="experience_end_date"
+                type="date"
+              />
+            </label>
+
+            <textarea
+              [(ngModel)]="experienceForm.description"
+              name="experience_description"
+              placeholder="Describe what you did"
+              rows="4"
+            ></textarea>
+
+            <button type="button" [disabled]="loading" (click)="addExperience()">
+              Add experience
+            </button>
+          </div>
+        } @else {
+          <p>Save your resume first to add experience.</p>
+        }
+
+        <hr />
+        <h3>Education</h3>
+
+        @if (user()?.seeker_profile?.resume?.education?.length) {
+          <ul>
+            @for (education of user()?.seeker_profile?.resume?.education ?? []; track education.id) {
+              <li>
+                <div>
+                  <strong>{{ education.degree }}</strong> - {{ education.institution }}
+                </div>
+                <div>
+                  {{ education.start_date }} - {{ education.end_date || 'Present' }}
+                </div>
+                <button
+                  type="button"
+                  [disabled]="loading"
+                  (click)="deleteEducation(education.id)"
+                >
+                  Delete
+                </button>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p>No education added yet.</p>
+        }
+
+        @if (resumeId) {
+          <div class="stack-form">
+            <input
+              [(ngModel)]="educationForm.institution"
+              name="education_institution"
+              placeholder="Institution"
+              type="text"
+            />
+
+            <input
+              [(ngModel)]="educationForm.degree"
+              name="education_degree"
+              placeholder="Degree"
+              type="text"
+            />
+
+            <label>
+              Start date
+              <input
+                [(ngModel)]="educationForm.start_date"
+                name="education_start_date"
+                type="date"
+              />
+            </label>
+
+            <label>
+              End date
+              <input
+                [(ngModel)]="educationForm.end_date"
+                name="education_end_date"
+                type="date"
+              />
+            </label>
+
+            <button type="button" [disabled]="loading" (click)="addEducation()">
+              Add education
+            </button>
+          </div>
+        } @else {
+          <p>Save your resume first to add education.</p>
+        }
+      } @else {
+        <div class="actions">
+          <button type="button" [disabled]="loading" (click)="save()">
+            {{ loading ? 'Saving...' : 'Save changes' }}
+          </button>
+        </div>
+      }
+    </div>
+  } @else {
+    <p>User information is not available.</p>
+  }
+</section>

@@ -1,0 +1,48 @@
+<section class="auth-card">
+  <h2>Register</h2>
+
+  @if (error) {
+    <p class="error">
+      {{ error }}
+    </p>
+  }
+
+  <input
+    [(ngModel)]="form.username"
+    placeholder="Username"
+    type="text"
+  />
+
+  <input
+    [(ngModel)]="form.email"
+    placeholder="Email"
+    type="email"
+  />
+
+  <input
+    [(ngModel)]="form.first_name"
+    placeholder="First name"
+    type="text"
+  />
+
+  <input
+    [(ngModel)]="form.last_name"
+    placeholder="Last name"
+    type="text"
+  />
+
+  <input
+    [(ngModel)]="form.password"
+    placeholder="Password"
+    type="password"
+  />
+
+  <select [(ngModel)]="form.role">
+    <option value="seeker">Seeker</option>
+    <option value="recruiter">Recruiter</option>
+  </select>
+
+  <button type="button" [disabled]="loading" (click)="register()">
+    {{ loading ? 'Creating account...' : 'Create account' }}
+  </button>
+</section>

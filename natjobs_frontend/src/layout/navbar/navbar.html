@@ -1,0 +1,31 @@
+<nav class="navbar">
+  <a routerLink="/">Jobs</a>
+
+  @if (user?.role === 'seeker') {
+    <a routerLink="/applications">
+      My Applications
+    </a>
+  }
+
+  @if (user) {
+    <a routerLink="/profile">
+      My Profile
+    </a>
+  }
+
+  @if (!user) {
+    <a routerLink="/auth/login">
+      Login
+    </a>
+
+    <a routerLink="/auth/register">
+      Register
+    </a>
+  }
+
+  @if (user) {
+    <button type="button" (click)="logout.emit()">
+      Logout
+    </button>
+  }
+</nav>

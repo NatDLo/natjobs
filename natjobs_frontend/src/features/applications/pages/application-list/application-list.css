@@ -1,0 +1,188 @@
+:host {
+  display: block;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 32px 20px 56px;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-header h2 {
+  margin: 0 0 8px;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #172033;
+}
+
+.page-description {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.state-message {
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.loading-state {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.error-state {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.empty-state {
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.application-list {
+  display: grid;
+  gap: 18px;
+}
+
+.application-card {
+  background: #ffffff;
+  border: 1px solid #dbe2ea;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
+}
+
+.application-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.application-title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1f2a44;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.status-pending {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.status-applied {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.status-reviewing {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.status-interview {
+  background: #f5f3ff;
+  color: #6d28d9;
+}
+
+.status-accepted {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-rejected {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.application-card__body {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.application-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.label {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.value {
+  color: #1e293b;
+  font-weight: 700;
+  text-align: right;
+}
+
+.application-card__actions a {
+  display: inline-flex;
+  align-items: center;
+  color: #1d4ed8;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.application-card__actions a:hover {
+  color: #1e40af;
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 24px 16px 40px;
+  }
+
+  .application-card {
+    padding: 20px;
+    border-radius: 16px;
+  }
+
+  .application-card__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .application-row {
+    flex-direction: column;
+  }
+
+  .value {
+    text-align: left;
+  }
+}

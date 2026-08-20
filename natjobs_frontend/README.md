@@ -92,4 +92,4 @@ Tests:
 
 ## License
 
-Natali
+MIT

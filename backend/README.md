@@ -130,4 +130,4 @@ Backend URL:
 
 ## License
 
-Natali
+MIT

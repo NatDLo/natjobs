@@ -2,30 +2,23 @@
   <a routerLink="/">Jobs</a>
 
   @if (user?.role === 'seeker') {
-    <a routerLink="/applications">
-      My Applications
-    </a>
+    <a routerLink="/applications">My Applications</a>
+    <a routerLink="/my-cv">My CV</a>
+    <a routerLink="/profile">My Profile</a>
   }
 
-  @if (user) {
-    <a routerLink="/profile">
-      My Profile
-    </a>
+  @if (user?.role === 'recruiter') {
+    <a routerLink="/my-jobs">My Jobs</a>
+    <a routerLink="/jobs/new">Publish Job</a>
+    <a routerLink="/profile">My Profile</a>
   }
 
   @if (!user) {
-    <a routerLink="/auth/login">
-      Login
-    </a>
-
-    <a routerLink="/auth/register">
-      Register
-    </a>
+    <a routerLink="/auth/login">Login</a>
+    <a routerLink="/auth/register">Register</a>
   }
 
   @if (user) {
-    <button type="button" (click)="logout.emit()">
-      Logout
-    </button>
+    <button type="button" (click)="logout.emit()">Logout</button>
   }
 </nav>

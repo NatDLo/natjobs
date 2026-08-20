@@ -1,0 +1,45 @@
+<section class="jobs-page">
+  <div class="jobs-header">
+    <div>
+      <h2>My Jobs</h2>
+      <p>Manage your published job posts.</p>
+    </div>
+
+    <a class="primary-action" routerLink="/jobs/new">
+      Publish Job
+    </a>
+  </div>
+
+  @if (loading) {
+    <p>Loading your jobs...</p>
+  }
+
+  @if (error) {
+    <p class="error">{{ error }}</p>
+  }
+
+  @if (!loading && !error) {
+    @if (!jobs.length) {
+      <div class="empty-state">
+        <p>You have not published any jobs yet.</p>
+        <a class="primary-action" routerLink="/jobs/new">Create your first job</a>
+      </div>
+    }
+
+    <div class="jobs-grid">
+      @for (job of jobs; track job.id) {
+        <div class="job-card">
+          <h3>{{ job.title }}</h3>
+          <p>{{ job.description }}</p>
+          <p><strong>Location:</strong> {{ job.location || 'Not specified' }}</p>
+          <p><strong>Status:</strong> {{ job.status }}</p>
+
+          <div class="job-actions">
+            <a [routerLink]="['/jobs', job.id]">View</a>
+            <a [routerLink]="['/jobs', job.id, 'applications']">Applicants</a>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</section>

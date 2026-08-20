@@ -74,6 +74,23 @@
   border: 1px solid #fecaca;
 }
 
+.auth-link {
+  margin: 16px 0 0;
+  text-align: center;
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+.auth-link a {
+  color: #1d4ed8;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-link a:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 768px) {
   .auth-card {
     margin: 32px 16px;

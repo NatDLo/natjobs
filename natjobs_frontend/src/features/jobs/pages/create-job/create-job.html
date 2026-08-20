@@ -1,0 +1,51 @@
+<section class="job-form-page">
+  <div class="job-form-header">
+    <div>
+      <h2>Publish Job</h2>
+      <p>Create a new job post for candidates.</p>
+    </div>
+
+    <a routerLink="/my-jobs">Back to My Jobs</a>
+  </div>
+
+  @if (error) {
+    <p class="error">{{ error }}</p>
+  }
+
+  @if (success) {
+    <p class="success">{{ success }}</p>
+  }
+
+  <div class="job-form-card">
+    <input
+      [(ngModel)]="form.title"
+      name="title"
+      placeholder="Job title"
+      type="text"
+    />
+
+    <textarea
+      [(ngModel)]="form.description"
+      name="description"
+      placeholder="Job description"
+      rows="6"
+    ></textarea>
+
+    <input
+      [(ngModel)]="form.location"
+      name="location"
+      placeholder="Location"
+      type="text"
+    />
+
+    <select [(ngModel)]="form.status" name="status">
+      <option value="open">Open</option>
+      <option value="paused">Paused</option>
+      <option value="closed">Closed</option>
+    </select>
+
+    <button type="button" [disabled]="loading" (click)="publish()">
+      {{ loading ? 'Publishing...' : 'Publish Job' }}
+    </button>
+  </div>
+</section>

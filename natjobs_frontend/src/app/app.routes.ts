@@ -51,6 +51,11 @@ export const routes: Routes = [
           import('../features/profile/pages/profile/profile').then((m) => m.Profile),
       },
       {
+        path: 'my-cv',
+        loadComponent: () =>
+          import('../features/profile/pages/my-cv/my-cv').then((m) => m.MyCvComponent),
+      },
+      {
         path: 'profile/edit',
         loadComponent: () =>
           import('../features/profile/pages/edit-profile/edit-profile').then((m) => m.EditProfile),
@@ -61,6 +66,16 @@ export const routes: Routes = [
           import('../features/profile/pages/public-profile/public-profile').then(
             (m) => m.PublicProfileComponent,
           ),
+      },
+      {
+        path: 'my-jobs',
+        loadComponent: () =>
+          import('../features/jobs/pages/my-jobs/my-jobs').then((m) => m.MyJobsComponent),
+      },
+      {
+        path: 'jobs/new',
+        loadComponent: () =>
+          import('../features/jobs/pages/create-job/create-job').then((m) => m.CreateJobComponent),
       },
     ],
   },

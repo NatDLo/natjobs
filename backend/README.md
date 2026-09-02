@@ -1,133 +1,108 @@
-# NatJobs Backend
+# ⚙️ NatJobs Backend API & WebSocket Service
 
-Django REST API and WebSocket backend for NatJobs, a recruitment platform where recruiters publish jobs and seekers apply using their resumes.
+Django REST Framework & Django Channels backend powering the **NatJobs** recruitment platform.
 
-## Features
+---
 
-- JWT authentication (login + refresh)
-- Custom user roles: recruiter and seeker
-- Recruiter job management
-- Seeker resume management:
-  - Resume profile
-  - Skills
-  - Languages
-  - Experience
-  - Education
-- Job applications workflow with status updates
-- Real-time chat between recruiter and seeker using Django Channels + WebSocket
-- SQLite by default, optional Redis for channels and cache
+## 🛠️ Tech Stack & Architecture
 
-## Tech Stack
+- **Framework**: Django 4.2 & Django REST Framework (DRF)
+- **Authentication**: SimpleJWT (JWT tokens: access + refresh)
+- **Real-Time Communication**: Django Channels 4 & Daphne ASGI Server
+- **Message Broker / Cache**: Redis 7 / Channel Layers
+- **Database**: PostgreSQL 15 (Docker) / SQLite (Local fallback)
+- **Testing**: Django Test Suite & Coverage
 
-- Django 4.2
-- Django REST Framework
-- SimpleJWT
-- Django Channels + Daphne
-- SQLite (default)
-- Redis (optional, for production-like async and caching)
+---
 
-## Project Structure
+## 📁 App Structure
 
+```text
 backend/
-- backend/ (settings, URLs, ASGI/WSGI)
-- users/
-- jobs/
-- resumes/
-- applications/
-- chat/
-- manage.py
+├── applications/    # Application submission, tracking & automated notification signals
+├── chat/            # WebSocket consumers, conversation routing, unread counts & JWT middleware
+├── jobs/            # Job postings CRUD, status toggling, permissions & role querysets
+├── resumes/         # Seeker CV management (skills, experience, education, languages)
+├── users/           # Custom User model (Seeker vs Recruiter), signals & profile handlers
+├── backend/         # Root settings, ASGI router, WSGI & URL configuration
+└── manage.py
+```
 
-Main API routing:
-- backend/backend/urls.py
+---
 
-WebSocket setup:
-- backend/backend/asgi.py
-- backend/chat/routing.py
-- backend/chat/consumers.py
+## 📡 API Reference
 
-## API Overview
+Base URL: `/api`
 
-Base path: /api
+### 🔑 Authentication
+- `POST /api/login/` - Authenticate and retrieve JWT token pair
+- `POST /api/refresh/` - Refresh JWT access token
 
-### Authentication
-- POST /api/login/
-- POST /api/refresh/
+### 👥 Users
+- `POST /api/users/register/` - Register account (`seeker` or `recruiter`)
+- `GET /api/users/me/` - Retrieve own profile
+- `PATCH /api/users/me/` - Update profile & recruiter company details
+- `GET /api/users/{id}/` - Retrieve public user profile and public CV
 
-### Users
-- POST /api/users/register/
-- GET/PATCH /api/users/me/
-- GET /api/users/{id}/
+### 💼 Jobs
+- `GET /api/jobs/` - List open jobs (or recruiter's own jobs)
+- `POST /api/jobs/` - Publish a new job (Recruiters only)
+- `GET /api/jobs/{id}/` - Retrieve job posting details
+- `PATCH /api/jobs/{id}/` - Update job details or change status (`open`, `paused`, `closed`)
+- `DELETE /api/jobs/{id}/` - Remove job posting (Owner recruiter only)
+- `GET /api/jobs/{id}/applications/` - List candidate applications for this job
 
-### Jobs
-- GET/POST /api/jobs/
-- GET /api/jobs/{id}/
-- PATCH/DELETE /api/jobs/{id}/update/
-- GET /api/jobs/{id}/applications/
+### 📄 Resumes & Candidate CVs (Seeker Only)
+- `POST /api/resumes/` - Create candidate resume
+- `GET /api/resumes/me/` - Get candidate's own resume
+- `PATCH /api/resumes/me/` - Update resume summary and availability
+- Nested resources for skills, languages, experiences, and education under `/api/resumes/...`
 
-### Resumes
-- GET/POST /api/resumes/
-- GET/PATCH /api/resumes/me/
-- GET/PATCH/DELETE /api/resumes/{id}/
-- Nested resources for skills, languages, experiences, and education under resumes
+### 📝 Applications
+- `GET /api/applications/` - List candidate's submitted applications
+- `POST /api/applications/` - Submit application for an open job (Includes resume snapshot)
+- `GET /api/applications/{id}/` - View application details
+- `PATCH /api/applications/{id}/status/` - Update status (`reviewing`, `interview`, `accepted`, `rejected`) + triggers automated chat notification
 
-### Applications
-- GET/POST /api/applications/
-- GET /api/applications/{id}/
-- PATCH /api/applications/{id}/status/
+### 💬 Real-Time Chat & Messages
+- `GET /api/chat/conversations/` - List all active conversations with unread counter and contact details
+- `POST /api/chat/conversations/create/` - Create or retrieve 1-on-1 chat room (`user_id` or `recruiter`/`seeker`)
+- `GET /api/chat/conversations/{id}/` - View conversation details
+- `POST /api/chat/conversations/{id}/read/` - Mark conversation messages as read
+- `GET /api/chat/unread-count/` - Total unread message badge count
 
-### Chat
-- GET /api/chat/conversations/
-- POST /api/chat/conversations/create/
-- GET /api/chat/conversations/{id}/
+---
 
-## WebSocket Chat
+## 🔌 WebSocket Specification
 
-Endpoint:
-- /ws/chat/{conversation_id}/?token={JWT_ACCESS_TOKEN}
+**Endpoint:** `ws://<host>/ws/chat/<conversation_id>/?token=<JWT_ACCESS_TOKEN>`
 
-Rules:
-- User must be authenticated with JWT token in query string
-- User must belong to the conversation
-- On connect, server sends the latest message history
-- New messages are broadcast to all participants in the conversation room
+- **Authentication**: JWT token validated in ASGI middleware (`JwtAuthMiddleware`).
+- **Authorization**: Connection accepted only if authenticated user is a participant.
+- **On Connect**: Delivers recent message history and marks pending messages as read.
+- **On Message**: Broadcasts new messages via channel layer to the conversation group.
 
-## Environment Variables
+---
 
-Supported variables:
-- DJANGO_SECRET_KEY
-- DJANGO_DEBUG (true or false)
-- DJANGO_ALLOWED_HOSTS (comma-separated)
-- USE_REDIS (1 to enable Redis, 0 otherwise)
-- REDIS_CHANNEL_URL (default: redis://127.0.0.1:6379/0)
-- REDIS_CACHE_URL (default: redis://127.0.0.1:6379/1)
+## 💻 Running Backend Locally
 
-Defaults are development-friendly (SQLite + in-memory channel layer + local cache).
+```bash
+# 1. Activate virtual environment
+source .venv/bin/activate
 
-## Local Development
+# 2. Run migrations
+python manage.py migrate
 
-Requirements:
-- Python 3.10+
-- pip
+# 3. Start development server
+python manage.py runserver
+```
 
-Install:
+### Running Tests
+```bash
+python manage.py test users jobs resumes applications chat
+```
 
-    python -m venv .venv
-    source .venv/bin/activate
-    pip install -r ../requirements.txt
+---
 
-Run:
-
-    python manage.py migrate
-    python manage.py runserver
-
-Backend URL:
-- http://127.0.0.1:8000
-
-## Notes
-
-- Authentication is required for most endpoints
-- Role-based permissions are enforced in views
-
-## License
-
+## 📄 License
 MIT

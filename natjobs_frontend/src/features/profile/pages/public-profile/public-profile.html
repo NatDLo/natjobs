@@ -1,5 +1,17 @@
 <div class="profile-page">
-  <h2>Public Profile</h2>
+  <div class="profile-header">
+    <h2>Public Profile</h2>
+    @if (profile && canMessage()) {
+      <button
+        type="button"
+        class="message-btn"
+        [disabled]="startingChat"
+        (click)="sendMessage()"
+      >
+        {{ startingChat ? 'Opening chat...' : '💬 Send message' }}
+      </button>
+    }
+  </div>
 
   @if (loading) {
     <p>Loading profile...</p>
@@ -29,23 +41,23 @@
         <hr />
         <h3>Resume</h3>
 
-        @if (profile.seeker_profile?.resume) {
-          <p><strong>Full name:</strong> {{ profile.seeker_profile?.resume?.full_name }}</p>
-          <p><strong>Location:</strong> {{ profile.seeker_profile?.resume?.location }}</p>
-          <p><strong>Bio:</strong> {{ profile.seeker_profile?.resume?.bio || 'Not provided' }}</p>
+        @if (profile.seeker_profile?.resume; as resume) {
+          <p><strong>Full name:</strong> {{ resume.full_name }}</p>
+          <p><strong>Location:</strong> {{ resume.location }}</p>
+          <p><strong>Bio:</strong> {{ resume.bio || 'Not provided' }}</p>
           <p>
             <strong>Availability:</strong>
-            {{ profile.seeker_profile?.resume?.availability || 'Not provided' }}
+            {{ resume.availability || 'Not provided' }}
           </p>
           <p>
             <strong>Mobility:</strong>
-            {{ profile.seeker_profile?.resume?.mobility ? 'Yes' : 'No' }}
+            {{ resume.mobility ? 'Yes' : 'No' }}
           </p>
 
           <h4>Skills</h4>
-          @if (profile.seeker_profile?.resume?.skills?.length) {
+          @if (resume.skills.length) {
             <ul>
-              @for (skill of profile.seeker_profile?.resume?.skills ?? []; track skill.id) {
+              @for (skill of resume.skills; track skill.id) {
                 <li>{{ skill.name }} (Level {{ skill.level }})</li>
               }
             </ul>
@@ -54,9 +66,9 @@
           }
 
           <h4>Languages</h4>
-          @if (profile.seeker_profile?.resume?.languages?.length) {
+          @if (resume.languages.length) {
             <ul>
-              @for (language of profile.seeker_profile?.resume?.languages ?? []; track language.id) {
+              @for (language of resume.languages; track language.id) {
                 <li>{{ language.name }} ({{ language.level }})</li>
               }
             </ul>
@@ -65,9 +77,9 @@
           }
 
           <h4>Experience</h4>
-          @if (profile.seeker_profile?.resume?.experiences?.length) {
+          @if (resume.experiences.length) {
             <ul>
-              @for (experience of profile.seeker_profile?.resume?.experiences ?? []; track experience.id) {
+              @for (experience of resume.experiences; track experience.id) {
                 <li>
                   <strong>{{ experience.job_title }}</strong> - {{ experience.company }}
                 </li>
@@ -78,9 +90,9 @@
           }
 
           <h4>Education</h4>
-          @if (profile.seeker_profile?.resume?.education?.length) {
+          @if (resume.education.length) {
             <ul>
-              @for (education of profile.seeker_profile?.resume?.education ?? []; track education.id) {
+              @for (education of resume.education; track education.id) {
                 <li>
                   <strong>{{ education.degree }}</strong> - {{ education.institution }}
                 </li>

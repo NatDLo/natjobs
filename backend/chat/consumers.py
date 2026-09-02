@@ -78,6 +78,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.group_name,
             {
                 "type": "chat.message",
+                "conversation_id": self.conversation_id,
                 "message": content,
                 "sender": self.user.username,
             },
@@ -92,6 +93,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send(
             text_data=json.dumps(
                 {
+                    "conversation_id": event.get("conversation_id", self.conversation_id),
                     "message": event["message"],
                     "sender": event["sender"],
                 }
@@ -120,9 +122,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_last_messages(self):
         """
-        Retrieve the last 50 messages for the conversation.
+        Retrieve the last 50 messages for the conversation and mark incoming ones as read.
         Returns a list of message dictionaries containing the sender, content, and creation timestamp.
         """
+        # Mark previous unread messages from the other user as read when user connects
+        Message.objects.filter(
+            conversation_id=self.conversation_id,
+            is_read=False,
+        ).exclude(sender=self.user).update(is_read=True)
 
         qs = (
             Message.objects.filter(conversation_id=self.conversation_id)
@@ -150,4 +157,5 @@ class ChatConsumer(AsyncWebsocketConsumer):
             conversation_id=self.conversation_id,
             sender=self.user,
             content=content,
+            is_read=False,
         )

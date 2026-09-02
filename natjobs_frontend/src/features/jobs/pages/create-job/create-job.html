@@ -1,8 +1,8 @@
 <section class="job-form-page">
   <div class="job-form-header">
     <div>
-      <h2>Publish Job</h2>
-      <p>Create a new job post for candidates.</p>
+      <h2>{{ isEditMode ? 'Edit Job' : 'Publish Job' }}</h2>
+      <p>{{ isEditMode ? 'Update your job post details and availability status.' : 'Create a new job post for candidates.' }}</p>
     </div>
 
     <a routerLink="/my-jobs">Back to My Jobs</a>
@@ -17,35 +17,42 @@
   }
 
   <div class="job-form-card">
+    <label for="job-title"><strong>Title</strong></label>
     <input
+      id="job-title"
       [(ngModel)]="form.title"
       name="title"
       placeholder="Job title"
       type="text"
     />
 
+    <label for="job-desc"><strong>Description</strong></label>
     <textarea
+      id="job-desc"
       [(ngModel)]="form.description"
       name="description"
       placeholder="Job description"
       rows="6"
     ></textarea>
 
+    <label for="job-loc"><strong>Location</strong></label>
     <input
+      id="job-loc"
       [(ngModel)]="form.location"
       name="location"
-      placeholder="Location"
+      placeholder="Location (e.g. Remote, Buenos Aires, etc.)"
       type="text"
     />
 
-    <select [(ngModel)]="form.status" name="status">
+    <label for="job-status"><strong>Status</strong></label>
+    <select id="job-status" [(ngModel)]="form.status" name="status">
       <option value="open">Open</option>
       <option value="paused">Paused</option>
       <option value="closed">Closed</option>
     </select>
 
     <button type="button" [disabled]="loading" (click)="publish()">
-      {{ loading ? 'Publishing...' : 'Publish Job' }}
+      {{ loading ? 'Saving...' : (isEditMode ? 'Update Job' : 'Publish Job') }}
     </button>
   </div>
 </section>

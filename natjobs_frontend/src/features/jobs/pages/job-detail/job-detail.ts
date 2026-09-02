@@ -11,6 +11,11 @@ interface JobDetail {
   title: string;
   description: string;
   recruiter: number;
+  recruiter_username?: string;
+  location?: string;
+  status?: string;
+  has_applied?: boolean;
+  application_status?: string;
 }
 
 @Component({
@@ -29,11 +34,16 @@ export class JobDetailComponent {
   readonly isRecruiter = computed(() => this.auth.role() === 'recruiter');
   readonly isSeeker = computed(() => this.auth.role() === 'seeker');
   readonly currentUser = this.auth.user;
+  readonly isOwner = computed(() => {
+    const user = this.currentUser();
+    return this.isRecruiter() && !!user && user.id === this.job?.recruiter;
+  });
 
   job: JobDetail | null = null;
   error = '';
   applying = false;
   startingConversation = false;
+  togglingStatus = false;
 
   constructor() {
     const id = Number(this.route.snapshot.params['id']);
@@ -54,7 +64,7 @@ export class JobDetailComponent {
   }
 
   apply(): void {
-    if (!this.job?.id || this.applying || !this.isSeeker()) {
+    if (!this.job?.id || this.applying || !this.isSeeker() || this.job.has_applied) {
       return;
     }
 
@@ -64,11 +74,36 @@ export class JobDetailComponent {
     this.applicationService.apply(this.job.id).subscribe({
       next: () => {
         this.applying = false;
+        if (this.job) {
+          this.job.has_applied = true;
+          this.job.application_status = 'applied';
+        }
         alert('Application submitted successfully.');
       },
-      error: () => {
+      error: (err) => {
         this.applying = false;
-        this.error = 'Could not submit the application.';
+        const msg = err?.error?.detail || (Array.isArray(err?.error) ? err.error[0] : 'Could not submit the application.');
+        this.error = msg;
+      },
+    });
+  }
+
+  toggleStatus(): void {
+    if (!this.job || this.togglingStatus) return;
+
+    const newStatus = this.job.status === 'open' ? 'closed' : 'open';
+    this.togglingStatus = true;
+
+    this.jobService.updateJob(this.job.id, { status: newStatus }).subscribe({
+      next: (updated: any) => {
+        if (this.job) {
+          this.job.status = updated.status || newStatus;
+        }
+        this.togglingStatus = false;
+      },
+      error: () => {
+        this.error = 'Could not update job status.';
+        this.togglingStatus = false;
       },
     });
   }

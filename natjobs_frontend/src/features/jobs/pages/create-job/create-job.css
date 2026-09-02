@@ -41,6 +41,13 @@
   box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
 }
 
+.job-form-card label {
+  display: block;
+  margin-bottom: 6px;
+  color: #334155;
+  font-size: 0.9rem;
+}
+
 .job-form-card input,
 .job-form-card textarea,
 .job-form-card select {

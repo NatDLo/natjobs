@@ -24,15 +24,15 @@ class JobListCreateView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         """
-        Return open jobs for candidates, or all jobs for recruiters.
+        Return open jobs for candidates, or all/filtered jobs for recruiters.
         """
 
         user = self.request.user
 
         if user.role == "recruiter":
-            return Job.objects.filter(recruiter=user)
+            return Job.objects.filter(recruiter=user).order_by("-created_at")
 
-        return Job.objects.filter(status="open")
+        return Job.objects.filter(status="open").order_by("-created_at")
 
     def perform_create(self, serializer):
         """
@@ -46,25 +46,31 @@ class JobListCreateView(generics.ListCreateAPIView):
         serializer.save(recruiter=self.request.user)
 
 
-class JobDetailView(generics.RetrieveAPIView):
+class JobDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
-    This view handles retrieving a single job posting.
+    This view handles retrieving, updating, and deleting a single job posting.
     GET: Retrieve a job posting by ID.
+    PUT/PATCH: Update job posting (recruiter owner only).
+    DELETE: Delete job posting (recruiter owner only).
     """
     serializer_class = JobSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         """
-        Return open jobs for candidates, or all jobs for recruiters.
+        Return jobs accessible for detail viewing.
         """
-        
-        user = self.request.user
+        return Job.objects.all()
 
-        if user.role == "recruiter":
-            return Job.objects.filter(recruiter=user)
+    def perform_update(self, serializer):
+        if self.request.user.role != "recruiter" or serializer.instance.recruiter != self.request.user:
+            raise PermissionDenied("You can only edit your own jobs.")
+        serializer.save()
 
-        return Job.objects.filter(status="open")
+    def perform_destroy(self, instance):
+        if self.request.user.role != "recruiter" or instance.recruiter != self.request.user:
+            raise PermissionDenied("You can only delete your own jobs.")
+        instance.delete()
 
 
 class JobUpdateView(generics.RetrieveUpdateDestroyAPIView):

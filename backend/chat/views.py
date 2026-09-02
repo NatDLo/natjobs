@@ -4,11 +4,12 @@ Only authenticated users can access these endpoints, and they can only see conve
 """
 
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
-from .models import Conversation
+from .models import Conversation, Message
 from .serializers import ConversationSerializer
 
 User = get_user_model()
@@ -26,13 +27,14 @@ class ConversationListView(generics.ListAPIView):
         """
         Return conversations where the authenticated user is either the recruiter or the seeker.
         """
-        
         user = self.request.user
 
-        return Conversation.objects.filter(
-            recruiter=user
-        ) | Conversation.objects.filter(
-            seeker=user
+        return (
+            Conversation.objects.filter(Q(recruiter=user) | Q(seeker=user))
+            .select_related("recruiter", "seeker")
+            .prefetch_related("messages", "recruiter__recruiterprofile", "seeker__seekerprofile")
+            .distinct()
+            .order_by("-created_at")
         )
 
 
@@ -49,29 +51,47 @@ class ConversationCreateView(generics.CreateAPIView):
         """
         Create a new conversation between a recruiter and a seeker.
         Validates that the recruiter and seeker exist and that the authenticated user is one of them.
+        Supports passing either `user_id` / `other_user_id` or explicit `recruiter` and `seeker`.
         """
 
-        recruiter_id = request.data.get("recruiter")
-        seeker_id = request.data.get("seeker")
+        other_user_id = request.data.get("user_id") or request.data.get("other_user_id")
 
-        if not recruiter_id or not seeker_id:
-            raise ValidationError("recruiter and seeker are required")
+        if other_user_id:
+            try:
+                other_user = User.objects.get(pk=other_user_id)
+            except User.DoesNotExist:
+                raise ValidationError("Target user not found.")
 
-        try:
-            recruiter = User.objects.get(pk=recruiter_id, role="recruiter")
-            seeker = User.objects.get(pk=seeker_id, role="seeker")
-        except User.DoesNotExist:
-            raise ValidationError("Invalid recruiter or seeker.")
+            if request.user.role == "recruiter" and other_user.role == "seeker":
+                recruiter = request.user
+                seeker = other_user
+            elif request.user.role == "seeker" and other_user.role == "recruiter":
+                seeker = request.user
+                recruiter = other_user
+            else:
+                raise ValidationError("Conversations must be between a recruiter and a job seeker.")
+        else:
+            recruiter_id = request.data.get("recruiter")
+            seeker_id = request.data.get("seeker")
 
-        if request.user.id not in {recruiter.id, seeker.id}:
-            raise PermissionDenied("You can only create conversations you participate in.")
+            if not recruiter_id or not seeker_id:
+                raise ValidationError("recruiter and seeker (or user_id) are required.")
+
+            try:
+                recruiter = User.objects.get(pk=recruiter_id, role="recruiter")
+                seeker = User.objects.get(pk=seeker_id, role="seeker")
+            except User.DoesNotExist:
+                raise ValidationError("Invalid recruiter or seeker.")
+
+            if request.user.id not in {recruiter.id, seeker.id}:
+                raise PermissionDenied("You can only create conversations you participate in.")
 
         conversation, created = Conversation.objects.get_or_create(
             recruiter=recruiter,
             seeker=seeker,
         )
 
-        serializer = self.get_serializer(conversation)
+        serializer = self.get_serializer(conversation, context=self.get_serializer_context())
         return Response(serializer.data)
 
 
@@ -91,8 +111,38 @@ class ConversationDetailView(generics.RetrieveAPIView):
 
         user = self.request.user
 
-        return Conversation.objects.filter(
-            recruiter=user
-        ) | Conversation.objects.filter(
-            seeker=user
-        )
+        return Conversation.objects.filter(Q(recruiter=user) | Q(seeker=user))
+
+
+class MarkConversationReadView(generics.GenericAPIView):
+    """
+    Mark all unread incoming messages in a conversation as read.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            conversation = Conversation.objects.get(pk=pk)
+        except Conversation.DoesNotExist:
+            raise ValidationError("Conversation not found.")
+
+        if request.user.id not in (conversation.recruiter_id, conversation.seeker_id):
+            raise PermissionDenied("Not a participant in this conversation.")
+
+        Message.objects.filter(conversation=conversation, is_read=False).exclude(sender=request.user).update(is_read=True)
+        return Response({"status": "ok"})
+
+
+class UnreadCountView(generics.GenericAPIView):
+    """
+    Returns the total unread message count for the current authenticated user.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        unread_total = Message.objects.filter(
+            conversation__in=Conversation.objects.filter(Q(recruiter=user) | Q(seeker=user)),
+            is_read=False,
+        ).exclude(sender=user).count()
+        return Response({"unread_count": unread_total})

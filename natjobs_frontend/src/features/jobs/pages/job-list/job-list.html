@@ -16,7 +16,12 @@
 
     @for (job of jobs; track job.id) {
       <div class="job-card">
-        <h3>{{ job.title }}</h3>
+        <div class="job-card-top">
+          <h3>{{ job.title }}</h3>
+          @if (job.status) {
+            <span class="status-pill status-{{ job.status }}">{{ job.status }}</span>
+          }
+        </div>
         <p>{{ job.description }}</p>
 
         <button type="button" [routerLink]="['/jobs', job.id]">

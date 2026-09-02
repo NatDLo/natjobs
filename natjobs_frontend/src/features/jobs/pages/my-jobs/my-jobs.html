@@ -29,14 +29,26 @@
     <div class="jobs-grid">
       @for (job of jobs; track job.id) {
         <div class="job-card">
-          <h3>{{ job.title }}</h3>
+          <div class="job-card-top">
+            <h3>{{ job.title }}</h3>
+            <span class="status-pill status-{{ job.status }}">{{ job.status }}</span>
+          </div>
+
           <p>{{ job.description }}</p>
           <p><strong>Location:</strong> {{ job.location || 'Not specified' }}</p>
-          <p><strong>Status:</strong> {{ job.status }}</p>
 
           <div class="job-actions">
-            <a [routerLink]="['/jobs', job.id]">View</a>
-            <a [routerLink]="['/jobs', job.id, 'applications']">Applicants</a>
+            <a class="action-link" [routerLink]="['/jobs', job.id]">View</a>
+            <a class="action-link" [routerLink]="['/jobs', job.id, 'applications']">Applicants</a>
+            <a class="action-link edit-link" [routerLink]="['/jobs', job.id, 'edit']">Edit</a>
+            <button
+              type="button"
+              class="toggle-btn"
+              [disabled]="updatingId === job.id"
+              (click)="toggleJobStatus(job)"
+            >
+              {{ job.status === 'open' ? 'Close Job' : 'Reopen Job' }}
+            </button>
           </div>
         </div>
       }

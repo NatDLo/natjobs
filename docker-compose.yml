@@ -1,0 +1,68 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: natjobs_db
+    environment:
+      POSTGRES_DB: natjobs
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d natjobs"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: natjobs_redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: natjobs_backend
+    environment:
+      DJANGO_SETTINGS_MODULE: backend.settings
+      DJANGO_DEBUG: "True"
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-django-insecure-natjobs-secret-key}
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,backend,frontend,web
+      DJANGO_CSRF_TRUSTED_ORIGINS: http://localhost,http://127.0.0.1,http://localhost:80,http://localhost:8000
+      DB_ENGINE: postgres
+      POSTGRES_DB: natjobs
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      USE_REDIS: "1"
+      REDIS_CHANNEL_URL: redis://redis:6379/0
+      REDIS_CACHE_URL: redis://redis:6379/1
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    volumes:
+      - media_data:/app/media
+
+  frontend:
+    build:
+      context: .
+      dockerfile: natjobs_frontend/Dockerfile
+    container_name: natjobs_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+  media_data:

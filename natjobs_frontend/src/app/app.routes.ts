@@ -27,9 +27,14 @@ export const routes: Routes = [
           import('../features/jobs/pages/job-list/job-list').then((m) => m.JobListComponent),
       },
       {
-        path: 'jobs/:id',
+        path: 'jobs/new',
         loadComponent: () =>
-          import('../features/jobs/pages/job-detail/job-detail').then((m) => m.JobDetailComponent),
+          import('../features/jobs/pages/create-job/create-job').then((m) => m.CreateJobComponent),
+      },
+      {
+        path: 'jobs/:id/edit',
+        loadComponent: () =>
+          import('../features/jobs/pages/create-job/create-job').then((m) => m.CreateJobComponent),
       },
       {
         path: 'jobs/:id/applications',
@@ -37,6 +42,11 @@ export const routes: Routes = [
           import('../features/jobs/pages/job-applicants/job-applicants').then(
             (m) => m.JobApplicantsComponent,
           ),
+      },
+      {
+        path: 'jobs/:id',
+        loadComponent: () =>
+          import('../features/jobs/pages/job-detail/job-detail').then((m) => m.JobDetailComponent),
       },
       {
         path: 'applications',
@@ -71,11 +81,6 @@ export const routes: Routes = [
         path: 'my-jobs',
         loadComponent: () =>
           import('../features/jobs/pages/my-jobs/my-jobs').then((m) => m.MyJobsComponent),
-      },
-      {
-        path: 'jobs/new',
-        loadComponent: () =>
-          import('../features/jobs/pages/create-job/create-job').then((m) => m.CreateJobComponent),
       },
     ],
   },

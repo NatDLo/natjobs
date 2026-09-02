@@ -7,7 +7,15 @@ export class ChatService {
   private http = inject(HttpClient);
 
   getConversations() {
-    return this.http.get("/api/chat/conversations/");
+    return this.http.get<any[]>("/api/chat/conversations/");
+  }
+
+  getUnreadCount() {
+    return this.http.get<{ unread_count: number }>("/api/chat/unread-count/");
+  }
+
+  markAsRead(conversationId: number) {
+    return this.http.post(`/api/chat/conversations/${conversationId}/read/`, {});
   }
 
   createConversation(data: any) {

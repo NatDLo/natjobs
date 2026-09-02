@@ -5,11 +5,48 @@
 .container {
   max-width: 960px;
   margin: 0 auto;
-  padding: 32px 20px 56px;
+  padding: 32px 28px 56px;
   background: #ffffff;
   border: 1px solid #dbe2ea;
   border-radius: 18px;
   box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.recruiter-link {
+  font-size: 0.95rem;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.status-badge.status-open {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-badge.status-closed {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-badge.status-paused {
+  background: #fef3c7;
+  color: #92400e;
 }
 
 .container h2 {
@@ -19,10 +56,37 @@
   color: #172033;
 }
 
+.location-text {
+  color: #64748b;
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+}
+
+.job-description-box {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 24px;
+}
+
+.job-description-box p {
+  margin: 0;
+  white-space: pre-wrap;
+  color: #334155;
+  line-height: 1.7;
+}
+
+.actions-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
 .container a {
   display: inline-flex;
   align-items: center;
-  margin-bottom: 8px;
   color: #1d4ed8;
   font-weight: 600;
   text-decoration: none;
@@ -34,21 +98,39 @@
   text-decoration: underline;
 }
 
-.container p {
-  margin: 0 0 16px;
-  color: #475569;
-  line-height: 1.7;
+.btn-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  padding: 11px 18px;
+  background: #eff6ff;
+  color: #1d4ed8 !important;
+  font-weight: 600;
+  text-decoration: none !important;
+  transition: background 0.15s ease;
+}
+
+.btn-link:hover {
+  background: #dbeafe;
+}
+
+.edit-btn-link {
+  background: #e0e7ff;
+  color: #4338ca !important;
+}
+
+.edit-btn-link:hover {
+  background: #c7d2fe;
 }
 
 .container button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-top: 8px;
-  margin-right: 12px;
   border: 0;
   border-radius: 12px;
-  padding: 11px 16px;
+  padding: 11px 18px;
   background: #1d4ed8;
   color: #ffffff;
   font: inherit;
@@ -68,15 +150,52 @@
   transform: none;
 }
 
+.secondary-btn {
+  background: #f1f5f9 !important;
+  color: #1e293b !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+.secondary-btn:hover {
+  background: #e2e8f0 !important;
+}
+
+.applied-btn {
+  background: #16a34a !important;
+  color: #ffffff !important;
+  cursor: default !important;
+  opacity: 1 !important;
+}
+
+.closed-btn {
+  background: #94a3b8 !important;
+  color: #ffffff !important;
+  cursor: not-allowed !important;
+}
+
+.error-box {
+  margin-bottom: 20px;
+  border-color: #fecaca;
+  background: #fee2e2;
+  color: #991b1b;
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 24px 16px 40px;
     border-radius: 16px;
   }
 
-  .container button {
+  .actions-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .container button,
+  .btn-link {
     width: 100%;
     margin-right: 0;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
+    box-sizing: border-box;
   }
 }

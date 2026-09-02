@@ -1,0 +1,18 @@
+# Generated for chat Message is_read field
+
+from django.db import migrations, models
+
+
+class Migration(migrations.Migration):
+
+    dependencies = [
+        ("chat", "0002_initial"),
+    ]
+
+    operations = [
+        migrations.AddField(
+            model_name="message",
+            name="is_read",
+            field=models.BooleanField(default=False),
+        ),
+    ]

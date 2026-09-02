@@ -1,95 +1,76 @@
-# NatJobs Frontend
+# 🎨 NatJobs Frontend - Angular 21 Client
 
-Angular frontend for NatJobs, a recruitment platform connecting recruiters and seekers through job posts, applications, resumes, and real-time chat.
+Modern, reactive single-page application (SPA) for the **NatJobs** recruitment platform.
 
-## Features
+---
 
-- JWT-based login and registration flow
-- Route guards for authenticated and guest users
-- Role-aware views (recruiter vs seeker)
-- Job list and job detail pages
-- Job applicants page for recruiters
-- Applications page for seekers
-- Profile, edit profile, and public profile pages
-- Real-time chat using WebSocket
-- Local API and WS proxy for development
+## 🚀 Key Features
 
-## Tech Stack
+- **Angular 21 Standalone Components**: Modern component architecture without NgModules.
+- **Signal-Driven & Reactive UI**: Built with Angular Signals and RxJS observables for snappy, reliable state management.
+- **Real-Time WebSocket Chat**: Floating messenger widget with unread message badges, connection lifecycle handling, and auto-scroll.
+- **Role-Based Routing & Guards**: `authGuard`, `guestGuard`, and `roleGuard` protecting recruiter and job-seeker views.
+- **HTTP Interceptors**: Automatic Bearer JWT injection and centralized error handling.
+- **Responsive Design**: Modern UI styled with CSS flexbox and grid, fully responsive across desktop and mobile.
 
-- Angular 21
-- TypeScript
-- RxJS
-- Vitest
-- Angular CLI
+---
 
-## Routes
+## 🛠️ Tech Stack
 
-### Public routes
-- /auth/login
-- /auth/register
+- **Framework**: Angular 21
+- **Language**: TypeScript 5.9
+- **Reactive Programming**: RxJS
+- **Testing**: Vitest
+- **Tooling**: Angular CLI & Vite/esbuild Application Builder
 
-### Protected routes
-- /
-- /jobs/:id
-- /jobs/:id/applications
-- /applications
-- /profile
-- /profile/edit
-- /users/:id
+---
 
-## API and WebSocket Integration
+## 🧭 Application Routes
 
-- API base path: /api
-- WebSocket base path: /ws
+### Public Routes
+- `/auth/login` - Candidate & Recruiter sign-in
+- `/auth/register` - Account creation with role selection
 
-Proxy config (development):
-- /api -> http://127.0.0.1:8000
-- /ws -> http://127.0.0.1:8000 (ws enabled)
+### Protected Routes (Authenticated)
+- `/` - Open job listings with live status badges
+- `/jobs/new` - Job creation form (Recruiters)
+- `/jobs/:id` - Job details, recruiter contact & one-click application
+- `/jobs/:id/edit` - Job edit and status toggle (`open`, `paused`, `closed`)
+- `/jobs/:id/applications` - Recruiter applicant management
+- `/my-jobs` - Recruiter dashboard of published jobs
+- `/applications` - Candidate dashboard of submitted applications
+- `/my-cv` - Seeker interactive CV builder (skills, languages, experience, education)
+- `/profile` - User profile dashboard
+- `/profile/edit` - User profile details editor
+- `/users/:id` - Public profile & CV viewer with direct message CTA
 
-This lets frontend and backend run on different ports without CORS issues during development.
+---
 
-## Local Development
+## 💻 Local Development
 
-Requirements:
+### Prerequisites
 - Node.js 20+
 - npm 10+
 
-Install:
+### Setup & Run
+```bash
+# 1. Install dependencies
+npm install
 
-    npm install
+# 2. Start local development server
+npm start
+```
 
-Run dev server:
+Application URL: `http://localhost:4200`
 
-    npm start
+> ℹ️ **Proxy:** API (`/api`) and WebSocket (`/ws`) requests are automatically proxied to `http://127.0.0.1:8000` via `proxy.conf.json`.
 
-Frontend URL:
-- http://localhost:4200
+### Building for Production
+```bash
+npm run build
+```
 
-Build:
+---
 
-    npm run build
-
-Tests:
-
-    npm test
-
-## Scripts
-
-- npm start
-- npm run build
-- npm run watch
-- npm test
-
-## Recommended Workflow
-
-1. Start backend on port 8000
-2. Start frontend on port 4200
-3. Login as recruiter or seeker
-4. Validate main flows:
-   - Recruiter creates jobs
-   - Seeker creates resume and applies to jobs
-   - Both users open a conversation and chat in real time
-
-## License
-
+## 📄 License
 MIT

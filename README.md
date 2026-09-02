@@ -1,198 +1,151 @@
-# NatJobs
+# 💼 NatJobs - Full Stack Recruitment & Real-Time Platform
 
-NatJobs is a full-stack recruitment platform that connects recruiters and job seekers.
+[![Django](https://img.shields.io/badge/Django-4.2-092E20?style=for-the-badge&logo=django&logoColor=white)](https://www.djangoproject.com/)
+[![Django REST Framework](https://img.shields.io/badge/DRF-3.15-red?style=for-the-badge&logo=django)](https://www.django-rest-framework.org/)
+[![Angular](https://img.shields.io/badge/Angular-21-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/)
+[![Docker](https://img.shields.io/badge/Docker_Compose-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 
-Recruiters can publish jobs and manage incoming applications.
-Seekers can build a complete CV, apply to jobs, and chat in real time with recruiters.
+**NatJobs** is a modern full-stack recruitment web platform that seamlessly connects **Job Seekers** and **Recruiters** with end-to-end application tracking and real-time WebSocket communication.
 
-## Project Overview
+---
 
-This repository contains two applications:
+## 🚀 Key Highlights & Architecture
 
-- Backend: Django + Django REST Framework + Channels (WebSocket)
-- Frontend: Angular 21
+- **Role-Based Workflows**: Distinct interfaces and capabilities tailored for **Job Seekers** and **Recruiters**.
+- **Real-Time Communication**: Live bidirectional chat powered by **Django Channels**, **WebSockets**, and **Redis Channel Layers**, complete with unread notification badges and auto-messaging upon application status updates.
+- **RESTful API & Security**: Robust **Django REST Framework** API secured with **JWT Authentication** (access + refresh tokens) and role guards.
+- **Modern Angular Frontend**: Built with **Angular 21 standalone components**, reactive state management, signal-driven UI, interceptors, and route guards.
+- **Containerized & Production Ready**: Full Docker Compose setup containing PostgreSQL, Redis, ASGI Daphne server, and Nginx.
 
-Main folders:
+---
 
-- backend application in [backend](backend)
-- frontend application in [natjobs_frontend](natjobs_frontend)
-- Python dependencies in [requirements.txt](requirements.txt)
+## ✨ Features
 
-## Core Features
+### 🏢 Recruiter Experience
+- **Job Management**: Create, edit, pause, and close job postings.
+- **Applicant Tracking**: Review candidate profiles, full resumes, and change status (`reviewing`, `interview`, `accepted`, `rejected`).
+- **Automated Chat Notifications**: Status changes instantly notify candidates via real-time chat.
+- **Direct Messaging**: Chat in real-time with candidates directly from their public profiles or applicant views.
 
-### Authentication and Authorization
+### 👤 Job Seeker Experience
+- **Job Discovery**: Explore active job openings with immediate status visibility.
+- **Interactive CV Builder**: Manage complete resume information (work experience, education, skills with proficiency levels, and languages).
+- **One-Click Application**: Apply to open jobs with duplicate prevention and live application tracking badges (`Applied`, `Reviewing`, etc.).
+- **Recruiter Contact**: Reach out to recruiters directly via profile or job detail pages.
 
-- JWT login and refresh flow
-- Role-based access: recruiter and seeker
-- Protected routes and role-aware API behavior
+### 💬 Real-Time Chat & Notification System
+- Instant messaging via WebSockets (`/ws/chat/{id}/`).
+- Live unread message counters with visual badge indicator on the floating chat widget.
+- Real contact names and company info (no generic IDs).
+- Message history retrieval upon joining.
 
-### Recruiter Features
+---
 
-- View own published jobs
-- Create new job postings
-- Review applications per job
-- Update application status (reviewing, interview, accepted, rejected)
-- Chat with seekers
+## 🛠️ Tech Stack
 
-### Seeker Features
+| Layer | Technologies |
+|---|---|
+| **Frontend** | Angular 21, TypeScript, RxJS, CSS3, Nginx |
+| **Backend** | Python 3.8+, Django 4.2, Django REST Framework, Django Channels, Daphne, SimpleJWT |
+| **Database & Cache** | PostgreSQL 15, Redis 7 (Channel Layer & Cache), SQLite (Local Dev fallback) |
+| **DevOps & Tooling** | Docker, Docker Compose, Git |
 
-- Browse open jobs
-- Build and edit full CV (resume, skills, languages, experience, education)
-- Apply to open jobs
-- Track own applications
-- Chat with recruiters
+---
 
-### Real-Time Communication
+## 🐳 Running with Docker (Recommended)
 
-- WebSocket chat through Django Channels
-- JWT token-based socket authentication
-- Conversation history and live message broadcast
-
-## Tech Stack
-
-### Backend
-
-- Django 4.2
-- Django REST Framework
-- SimpleJWT
-- Django Channels + Daphne
-- SQLite (default)
-- Optional Redis channel layer/cache
-
-### Frontend
-
-- Angular 21
-- TypeScript
-- RxJS
-- Vitest
-- Angular CLI
-
-## Backend API (High Level)
-
-Base path: /api
-
-- Auth: /api/login, /api/refresh
-- Users: /api/users
-- Resumes: /api/resumes
-- Jobs: /api/jobs
-- Applications: /api/applications
-- Chat: /api/chat
-
-WebSocket endpoint:
-
-- /ws/chat/{conversation_id}/?token={JWT_ACCESS_TOKEN}
-
-## Local Development Setup
-
-### 1. Prerequisites
-
-- Python 3.10+ recommended
-- Node.js 20+
-- npm 10+
-
-### 2. Backend Setup
-
-From repository root:
+To start the full stack (PostgreSQL + Redis + Django Backend + Angular Frontend):
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -U pip
-pip install -r requirements.txt
+docker compose up --build
 ```
 
-Run backend:
+- **Frontend Application (Nginx):** [http://localhost:80](http://localhost:80)
+- **Backend API & WebSockets (Daphne):** [http://localhost:8000](http://localhost:8000)
+- **PostgreSQL Database:** `localhost:5432`
+- **Redis Service:** `localhost:6379`
 
+---
+
+## 💻 Local Development Setup
+
+### 1. Prerequisites
+- Python 3.8+ (3.10+ recommended)
+- Node.js 20+ & npm 10+
+
+### 2. Backend Setup
 ```bash
+# From repository root:
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+# Run migrations and start development server
 cd backend
 python manage.py migrate
 python manage.py runserver
 ```
-
-Backend URL:
-
-- http://127.0.0.1:8000
+*Backend URL:* `http://127.0.0.1:8000`
 
 ### 3. Frontend Setup
-
-Open a second terminal from repository root:
-
 ```bash
+# Open a new terminal from repository root:
 cd natjobs_frontend
 npm install
 npm start
 ```
+*Frontend URL:* `http://localhost:4200` *(API and WebSocket proxy configured in `proxy.conf.json`)*
 
-Frontend URL:
+---
 
-- http://localhost:4200
+## 🧪 Testing & Code Quality
 
-The frontend proxies API and WebSocket traffic using [natjobs_frontend/proxy.conf.json](natjobs_frontend/proxy.conf.json).
-
-## Testing
-
-### Backend tests
-
-From [backend](backend):
-
+### Backend Tests
 ```bash
-python manage.py test
-```
+# Run unit tests across all Django apps:
+python backend/manage.py test users jobs resumes applications chat
 
-Run coverage:
-
-```bash
-coverage erase
-coverage run manage.py test
+# Coverage report:
+coverage run backend/manage.py test
 coverage report -m
-coverage html
 ```
 
-### Frontend tests
-
-From [natjobs_frontend](natjobs_frontend):
-
+### Frontend Build & Test
 ```bash
+cd natjobs_frontend
 npm test
+npm run build
 ```
 
-## Environment Notes
+---
 
-Backend settings are in [backend/backend/settings.py](backend/backend/settings.py).
+## 🌐 API Overview
 
-Useful variables:
+Base URL: `/api`
 
-- DJANGO_SECRET_KEY
-- DJANGO_DEBUG
-- DJANGO_ALLOWED_HOSTS
-- USE_REDIS
-- REDIS_CHANNEL_URL
-- REDIS_CACHE_URL
+| Endpoint | Method | Description |
+|---|---|---|
+| `/api/login/` | `POST` | Obtain JWT token pair (access + refresh) |
+| `/api/refresh/` | `POST` | Refresh access token |
+| `/api/users/register/` | `POST` | Register a new user (Seeker / Recruiter) |
+| `/api/users/me/` | `GET`, `PATCH` | Retrieve or update authenticated profile |
+| `/api/users/{id}/` | `GET` | View public user profile & CV |
+| `/api/jobs/` | `GET`, `POST` | List open jobs / Create new job |
+| `/api/jobs/{id}/` | `GET`, `PATCH`, `DELETE` | View, update, or close job posting |
+| `/api/jobs/{id}/applications/` | `GET` | List applicants for recruiter's job |
+| `/api/applications/` | `GET`, `POST` | List candidate applications / Submit application |
+| `/api/applications/{id}/status/` | `PATCH` | Update application status & trigger chat notification |
+| `/api/resumes/me/` | `GET`, `PATCH` | Retrieve or update seeker CV |
+| `/api/chat/conversations/` | `GET` | List active chat conversations |
+| `/api/chat/conversations/create/` | `POST` | Start or get 1-on-1 chat conversation |
+| `/api/chat/unread-count/` | `GET` | Get total unread messages count |
+| `/ws/chat/{id}/?token={JWT}` | `WebSocket` | Real-time chat connection |
 
-Defaults are development-friendly (SQLite + in-memory channels/cache).
+---
 
-## Frontend Scripts
+## 📄 License
 
-Scripts are defined in [natjobs_frontend/package.json](natjobs_frontend/package.json):
-
-- npm start
-- npm run build
-- npm run watch
-- npm test
-
-## Recommended Validation Flow
-
-1. Register one recruiter and one seeker user.
-2. Recruiter publishes a job.
-3. Seeker creates CV and applies.
-4. Recruiter reviews applications.
-5. Both users open conversation and exchange messages.
-
-## Notes
-
-- Keep secrets out of Git (.env, local DB, node_modules, build artifacts).
-- Python 3.8 may show cryptography deprecation warnings; prefer Python 3.10+ for long-term compatibility.
-
-## License
-
-MIT
+This project is licensed under the MIT License.

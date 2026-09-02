@@ -16,13 +16,15 @@ export class MyJobsComponent {
   jobs: any[] = [];
   loading = true;
   error = '';
+  updatingId: number | null = null;
 
   constructor() {
     this.loadJobs();
   }
 
   loadJobs(): void {
-    this.jobService.getJobs().subscribe({
+    this.loading = true;
+    this.jobService.getMyJobs().subscribe({
       next: (res: any) => {
         this.jobs = Array.isArray(res) ? res : [];
         this.loading = false;
@@ -30,6 +32,23 @@ export class MyJobsComponent {
       error: () => {
         this.error = 'Could not load your jobs.';
         this.loading = false;
+      },
+    });
+  }
+
+  toggleJobStatus(job: any): void {
+    if (this.updatingId === job.id) return;
+    const newStatus = job.status === 'open' ? 'closed' : 'open';
+    this.updatingId = job.id;
+
+    this.jobService.updateJob(job.id, { status: newStatus }).subscribe({
+      next: (updated: any) => {
+        job.status = updated.status || newStatus;
+        this.updatingId = null;
+      },
+      error: () => {
+        this.error = `Could not ${newStatus === 'closed' ? 'close' : 'reopen'} the job.`;
+        this.updatingId = null;
       },
     });
   }

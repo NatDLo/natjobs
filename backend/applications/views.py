@@ -99,3 +99,59 @@ class ApplicationUpdateStatusView(generics.UpdateAPIView):
         """
         
         return Application.objects.filter(job__recruiter=self.request.user)
+
+    def perform_update(self, serializer):
+        """
+        Update the application status and send a notification message in chat on any status change.
+        """
+        prev_status = serializer.instance.status
+        instance = serializer.save()
+        new_status = instance.status
+
+        if new_status != prev_status:
+            try:
+                from chat.models import Conversation, Message
+                from asgiref.sync import async_to_sync
+                from channels.layers import get_channel_layer
+
+                conversation, _ = Conversation.objects.get_or_create(
+                    recruiter=self.request.user,
+                    seeker=instance.seeker,
+                )
+
+                if new_status == "accepted":
+                    status_text = "accepted 🎉"
+                elif new_status == "interview":
+                    status_text = "moved to the Interview stage 📅"
+                elif new_status == "reviewing":
+                    status_text = "moved to Reviewing 🔍"
+                elif new_status == "rejected":
+                    status_text = "updated to Rejected"
+                else:
+                    status_text = f"updated to '{new_status}'"
+
+                msg_text = (
+                    f"Hello {instance.seeker.username}! Your application for '{instance.job.title}' "
+                    f"has been {status_text} by {self.request.user.username}."
+                )
+
+                Message.objects.create(
+                    conversation=conversation,
+                    sender=self.request.user,
+                    content=msg_text,
+                    is_read=False,
+                )
+
+                channel_layer = get_channel_layer()
+                if channel_layer:
+                    async_to_sync(channel_layer.group_send)(
+                        f"chat_{conversation.id}",
+                        {
+                            "type": "chat.message",
+                            "conversation_id": conversation.id,
+                            "message": msg_text,
+                            "sender": self.request.user.username,
+                        },
+                    )
+            except Exception:
+                pass

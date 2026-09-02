@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject } from '@angular/core';
+import { Component, computed, effect, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
@@ -21,7 +21,7 @@ import { ResumeService } from '../../../../core/services/resume.service';
   templateUrl: './edit-profile.html',
   styleUrls: ['./edit-profile.css'],
 })
-export class EditProfile {
+export class EditProfile implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly resumeService = inject(ResumeService);
   private readonly router = inject(Router);
@@ -99,6 +99,10 @@ export class EditProfile {
         this.patchResumeForm(resume);
       }
     });
+  }
+
+  ngOnInit(): void {
+    this.auth.fetchMe().subscribe();
   }
 
   save(): void {

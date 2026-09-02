@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject } from '@angular/core';
+import { Component, computed, effect, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
@@ -20,7 +20,7 @@ import { ResumeService } from '../../../../core/services/resume.service';
   templateUrl: './my-cv.html',
   styleUrls: ['./my-cv.css'],
 })
-export class MyCvComponent {
+export class MyCvComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly resumeService = inject(ResumeService);
 
@@ -82,6 +82,10 @@ export class MyCvComponent {
         this.patchResumeForm(resume);
       }
     });
+  }
+
+  ngOnInit(): void {
+    this.auth.fetchMe().subscribe();
   }
 
   save(): void {

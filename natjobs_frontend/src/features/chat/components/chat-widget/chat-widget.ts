@@ -1,5 +1,6 @@
-import { Component, inject, NgZone, OnDestroy } from '@angular/core';
+import { Component, inject, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { ChatService } from '../../../../core/services/chat.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
@@ -8,12 +9,14 @@ import { CommonModule } from '@angular/common';
   templateUrl: './chat-widget.html',
   styleUrls: ['./chat-widget.css'],
   standalone: true,
-  imports: [FormsModule, CommonModule]
+  imports: [FormsModule, CommonModule],
 })
-
-export class ChatWidgetComponent {
+export class ChatWidgetComponent implements OnInit, OnDestroy {
   private readonly chat = inject(ChatService);
+  private readonly auth = inject(AuthService);
   private readonly zone = inject(NgZone);
+
+  readonly currentUser = this.auth.user;
 
   open = false;
   conversations: any[] = [];
@@ -23,8 +26,60 @@ export class ChatWidgetComponent {
   wsConnected = false;
   wsError = '';
   message = '';
+  totalUnread = 0;
+  private pollInterval: any = null;
 
-  toggle() {
+  ngOnInit(): void {
+    this.refreshConversations();
+    // Poll unread status periodically
+    this.pollInterval = setInterval(() => {
+      this.refreshConversations();
+    }, 15000);
+  }
+
+  refreshConversations(): void {
+    this.chat.getConversations().subscribe({
+      next: (res: any) => {
+        this.conversations = Array.isArray(res) ? res : [];
+        this.recalculateUnread();
+      },
+      error: () => {
+        // Silent fail on background refresh
+      },
+    });
+  }
+
+  recalculateUnread(): void {
+    this.totalUnread = this.conversations.reduce(
+      (sum, c) => sum + (c.unread_count || 0),
+      0,
+    );
+  }
+
+  getContactName(c: any): string {
+    if (!c) return 'Conversation';
+    if (c.other_user?.username) {
+      const company = c.other_user.company_name
+        ? ` (${c.other_user.company_name})`
+        : '';
+      return `${c.other_user.username}${company}`;
+    }
+    const current = this.currentUser();
+    if (current && current.role === 'recruiter' && c.seeker_username) {
+      return c.seeker_username;
+    }
+    if (current && current.role === 'seeker' && c.recruiter_username) {
+      return c.recruiter_username;
+    }
+    return `Chat #${c.id}`;
+  }
+
+  getContactRole(c: any): string {
+    if (!c?.other_user?.role) return '';
+    return c.other_user.role === 'recruiter' ? 'Recruiter' : 'Seeker';
+  }
+
+  toggle(): void {
     this.open = !this.open;
 
     if (!this.open) {
@@ -35,20 +90,22 @@ export class ChatWidgetComponent {
       return;
     }
 
-    this.chat.getConversations().subscribe({
-      next: (res: any) => {
-        this.conversations = Array.isArray(res) ? res : [];
-      },
-      error: () => {
-        this.wsError = 'Could not load conversations.';
-      },
-    });
+    this.refreshConversations();
   }
 
-  openConv(c: any) {
+  openConv(c: any): void {
     this.active = c;
     this.messages = [];
     this.wsError = '';
+
+    if (c.unread_count > 0) {
+      this.chat.markAsRead(c.id).subscribe({
+        next: () => {
+          c.unread_count = 0;
+          this.recalculateUnread();
+        },
+      });
+    }
 
     this.cleanupSocket();
     this.ws = this.chat.connect(c.id);
@@ -85,6 +142,21 @@ export class ChatWidgetComponent {
         }
 
         this.messages = [...this.messages, normalized];
+
+        // Update last message preview
+        if (this.active) {
+          this.active.last_message = {
+            content: normalized.content,
+            sender: normalized.sender,
+            created_at: normalized.created_at || new Date().toISOString(),
+          };
+        }
+
+        // If incoming message is from someone else while conversation is active, mark read
+        const current = this.currentUser();
+        if (current && normalized.sender !== current.username && this.active?.id === c.id) {
+          this.chat.markAsRead(c.id).subscribe();
+        }
       });
     };
 
@@ -101,7 +173,7 @@ export class ChatWidgetComponent {
     };
   }
 
-  send() {
+  send(): void {
     if (!this.ws || !this.wsConnected || !this.message.trim()) return;
 
     this.ws.send(JSON.stringify({ message: this.message }));
@@ -109,6 +181,9 @@ export class ChatWidgetComponent {
   }
 
   ngOnDestroy(): void {
+    if (this.pollInterval) {
+      clearInterval(this.pollInterval);
+    }
     this.cleanupSocket();
   }
 

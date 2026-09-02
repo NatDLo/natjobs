@@ -7,13 +7,21 @@
       aria-label="Open chat"
     >
       💬
+      @if (totalUnread > 0) {
+        <span class="chat-badge">{{ totalUnread > 9 ? '9+' : totalUnread }}</span>
+      }
     </button>
   }
 
   @if (open) {
     <section class="chat-panel">
       <div class="chat-header">
-        <span>Messages</span>
+        <div class="chat-header-info">
+          <span>{{ active ? getContactName(active) : 'Messages' }}</span>
+          @if (active) {
+            <small class="chat-header-sub">{{ getContactRole(active) }}</small>
+          }
+        </div>
         <button type="button" (click)="toggle()" aria-label="Close chat">
           ✕
         </button>
@@ -33,7 +41,18 @@
                 [class.active]="active?.id === c.id"
                 (click)="openConv(c)"
               >
-                <span>Chat {{ c.id }}</span>
+                <div class="chat-item-header">
+                  <span class="chat-contact-name">{{ getContactName(c) }}</span>
+                  @if (c.unread_count > 0) {
+                    <span class="chat-item-unread-dot" title="Unread messages"></span>
+                  }
+                </div>
+                <div class="chat-item-footer">
+                  <span class="chat-item-role">{{ getContactRole(c) }}</span>
+                  @if (c.last_message) {
+                    <span class="chat-item-preview">{{ c.last_message.content }}</span>
+                  }
+                </div>
               </button>
             }
           } @else {
@@ -45,9 +64,14 @@
           @if (active) {
             @if (messages.length) {
               @for (m of messages; track $index) {
-                <div class="message-item">
-                  <b>{{ m.sender }}:</b>
-                  <span>{{ m.content }}</span>
+                <div class="message-item" [class.outgoing]="currentUser()?.username === m.sender">
+                  <div class="message-header">
+                    <b>{{ m.sender }}</b>
+                    @if (m.created_at) {
+                      <span class="message-time">{{ m.created_at | date:'shortTime' }}</span>
+                    }
+                  </div>
+                  <span class="message-text">{{ m.content }}</span>
                 </div>
               }
             } @else {
@@ -62,6 +86,7 @@
       <div class="chat-input">
         <input
           [(ngModel)]="message"
+          (keydown.enter)="send()"
           type="text"
           placeholder="Write a message..."
           [disabled]="!active || !wsConnected"

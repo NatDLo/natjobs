@@ -156,6 +156,21 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             "last_name",
             "role",
         ]
+        extra_kwargs = {
+            "email": {"required": True, "allow_blank": False},
+        }
+
+    def validate_username(self, value):
+        if User.objects.filter(username__iexact=value).exists():
+            raise serializers.ValidationError("This username is already in use.")
+        return value
+
+    def validate_email(self, value):
+        if not value:
+            raise serializers.ValidationError("Email is required.")
+        if User.objects.filter(email__iexact=value).exists():
+            raise serializers.ValidationError("This email is already in use.")
+        return value
 
     def create(self, validated_data):
         """

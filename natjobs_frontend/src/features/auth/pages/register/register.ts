@@ -40,10 +40,48 @@ export class Register {
         this.loading = false;
         this.router.navigate(['/auth/login']);
       },
-      error: () => {
+      error: (err) => {
         this.loading = false;
-        this.error = 'Could not create the account.';
+        this.error = this.parseErrorMessage(err);
       },
     });
+  }
+
+  private parseErrorMessage(err: any): string {
+    const errorObj = err?.error;
+    if (!errorObj) {
+      return 'Could not create the account.';
+    }
+
+    if (typeof errorObj === 'string') {
+      return errorObj;
+    }
+
+    if (errorObj.username) {
+      const uErr = Array.isArray(errorObj.username) ? errorObj.username[0] : errorObj.username;
+      return typeof uErr === 'string' ? uErr : 'This username is already in use.';
+    }
+
+    if (errorObj.email) {
+      const eErr = Array.isArray(errorObj.email) ? errorObj.email[0] : errorObj.email;
+      return typeof eErr === 'string' ? eErr : 'This email is already in use.';
+    }
+
+    if (errorObj.password) {
+      const pErr = Array.isArray(errorObj.password) ? errorObj.password[0] : errorObj.password;
+      return typeof pErr === 'string' ? pErr : 'Invalid password.';
+    }
+
+    if (errorObj.detail) {
+      return typeof errorObj.detail === 'string' ? errorObj.detail : 'Could not create the account.';
+    }
+
+    const firstKey = Object.keys(errorObj)[0];
+    if (firstKey) {
+      const val = errorObj[firstKey];
+      return Array.isArray(val) ? val[0] : String(val);
+    }
+
+    return 'Could not create the account.';
   }
 }

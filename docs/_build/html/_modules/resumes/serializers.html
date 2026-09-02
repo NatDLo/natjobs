@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>resumes.serializers &#8212; NatJobs 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=6625fa76" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=039e1c02" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=af2ce170"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for resumes.serializers</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Serializers for resume aggregate and nested resume entities.</span>
+<span class="sd">Nesteed fields are read-only and managed via separate endpoints for skills, languages, experience, and education.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">rest_framework</span><span class="w"> </span><span class="kn">import</span> <span class="n">serializers</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Resume</span><span class="p">,</span> <span class="n">Skill</span><span class="p">,</span> <span class="n">Language</span><span class="p">,</span> <span class="n">Experience</span><span class="p">,</span> <span class="n">Education</span>
+
+
+<div class="viewcode-block" id="SkillSerializer"><a class="viewcode-back" href="../../modules.html#resumes.serializers.SkillSerializer">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SkillSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Serializer for a candidate&#39;s skill with proficiency level.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SkillSerializer.Meta"><a class="viewcode-back" href="../../modules.html#resumes.serializers.SkillSerializer.Meta">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Skill</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;resume&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;level&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">read_only_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;resume&quot;</span><span class="p">]</span></div></div>
+
+
+<div class="viewcode-block" id="LanguageSerializer"><a class="viewcode-back" href="../../modules.html#resumes.serializers.LanguageSerializer">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">LanguageSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Serializer for a candidate&#39;s language proficiency.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="LanguageSerializer.Meta"><a class="viewcode-back" href="../../modules.html#resumes.serializers.LanguageSerializer.Meta">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Language</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;resume&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;level&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">read_only_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;resume&quot;</span><span class="p">]</span></div></div>
+
+
+<div class="viewcode-block" id="ExperienceSerializer"><a class="viewcode-back" href="../../modules.html#resumes.serializers.ExperienceSerializer">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ExperienceSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Serializer for a candidate&#39;s work experience.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ExperienceSerializer.Meta"><a class="viewcode-back" href="../../modules.html#resumes.serializers.ExperienceSerializer.Meta">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Experience</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;resume&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;job_title&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;company&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;start_date&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;end_date&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">read_only_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;resume&quot;</span><span class="p">]</span></div></div>
+
+
+<div class="viewcode-block" id="EducationSerializer"><a class="viewcode-back" href="../../modules.html#resumes.serializers.EducationSerializer">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">EducationSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Serializer for a candidate&#39;s educational background.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="EducationSerializer.Meta"><a class="viewcode-back" href="../../modules.html#resumes.serializers.EducationSerializer.Meta">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Education</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;resume&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;institution&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;degree&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;start_date&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;end_date&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">read_only_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;resume&quot;</span><span class="p">]</span></div></div>
+
+
+<div class="viewcode-block" id="ResumeSerializer"><a class="viewcode-back" href="../../modules.html#resumes.serializers.ResumeSerializer">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ResumeSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Serializer for the Resume aggregate, including nested read-only fields for skills, languages, experience, and education.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">skills</span> <span class="o">=</span> <span class="n">SkillSerializer</span><span class="p">(</span><span class="n">many</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">languages</span> <span class="o">=</span> <span class="n">LanguageSerializer</span><span class="p">(</span><span class="n">many</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">experiences</span> <span class="o">=</span> <span class="n">ExperienceSerializer</span><span class="p">(</span><span class="n">many</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">education</span> <span class="o">=</span> <span class="n">EducationSerializer</span><span class="p">(</span><span class="n">many</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ResumeSerializer.Meta"><a class="viewcode-back" href="../../modules.html#resumes.serializers.ResumeSerializer.Meta">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Resume</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;user&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;full_name&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;location&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;phone&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;photo&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;bio&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;availability&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;mobility&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;skills&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;languages&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;experiences&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;education&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">read_only_fields</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;user&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;skills&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;languages&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;experiences&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;education&quot;</span><span class="p">,</span>
+        <span class="p">]</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">NatJobs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">System Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture.html">Architecture &amp; Technologies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Backend Modules &amp; API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2026, NatJobs Team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

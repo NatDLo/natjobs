@@ -33,6 +33,12 @@ class ConversationSerializer(serializers.ModelSerializer):
         read_only_fields = ["created_at"]
 
     def get_other_user(self, obj):
+        """
+        Return user details of the other participant in the conversation.
+
+        :param obj: The Conversation instance.
+        :return: Dict containing other participant's id, username, role, and company.
+        """
         request = self.context.get("request")
         if not request or not request.user.is_authenticated:
             return None
@@ -51,6 +57,12 @@ class ConversationSerializer(serializers.ModelSerializer):
         }
 
     def get_last_message(self, obj):
+        """
+        Retrieve the most recent message in this conversation.
+
+        :param obj: The Conversation instance.
+        :return: Dict with content, sender username, and timestamp, or None.
+        """
         msg = obj.messages.order_by("-created_at").first()
         if not msg:
             return None
@@ -61,6 +73,12 @@ class ConversationSerializer(serializers.ModelSerializer):
         }
 
     def get_unread_count(self, obj):
+        """
+        Count unread incoming messages for the requesting user in this conversation.
+
+        :param obj: The Conversation instance.
+        :return: Integer count of unread messages.
+        """
         request = self.context.get("request")
         if not request or not request.user.is_authenticated:
             return 0

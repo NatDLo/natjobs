@@ -23,6 +23,12 @@ class SeekerProfileSerializer(serializers.ModelSerializer):
         ]
 
     def get_resume(self, obj):
+        """
+        Retrieve and serialize the resume associated with this seeker profile.
+
+        :param obj: The SeekerProfile model instance.
+        :return: Serialized resume dictionary or None if no resume exists.
+        """
         try:
             resume = Resume.objects.get(user=obj.user)
         except Resume.DoesNotExist:
@@ -32,7 +38,8 @@ class SeekerProfileSerializer(serializers.ModelSerializer):
 
 
 class RecruiterProfileSerializer(serializers.ModelSerializer):
-    """Serializer for recruiter profiles, including the company name.
+    """
+    Serializer for recruiter profiles, including the company name.
     The company_name field is editable for recruiters and read-only for job seekers.
     """ 
     
@@ -65,11 +72,23 @@ class UserPublicProfileSerializer(serializers.ModelSerializer):
         ]
 
     def get_seeker_profile(self, obj):
+        """
+        Retrieve serialized seeker profile if the user's role is 'seeker'.
+
+        :param obj: The User instance.
+        :return: Serialized SeekerProfile dict or None.
+        """
         if obj.role != "seeker" or not hasattr(obj, "seekerprofile"):
             return None
         return SeekerProfileSerializer(obj.seekerprofile, context=self.context).data
 
     def get_recruiter_profile(self, obj):
+        """
+        Retrieve serialized recruiter profile if the user's role is 'recruiter'.
+
+        :param obj: The User instance.
+        :return: Serialized RecruiterProfile dict or None.
+        """
         if obj.role != "recruiter" or not hasattr(obj, "recruiterprofile"):
             return None
         return RecruiterProfileSerializer(obj.recruiterprofile, context=self.context).data
@@ -105,7 +124,13 @@ class UserMeUpdateSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, attrs):
-        """Ensure that only recruiters can update the company_name field."""
+        """
+        Ensure that only recruiters can update the company_name field.
+
+        :param attrs: Dictionary of field inputs to validate.
+        :return: Validated attributes.
+        :raises serializers.ValidationError: If a non-recruiter attempts to set company_name.
+        """
 
         user = self.instance
 
@@ -117,7 +142,13 @@ class UserMeUpdateSerializer(serializers.ModelSerializer):
         return attrs
 
     def update(self, instance, validated_data):
-        """Update the user's profile information, including the company name for recruiters."""
+        """
+        Update the user's profile information, including the company name for recruiters.
+
+        :param instance: Existing User instance.
+        :param validated_data: Validated dictionary of fields to update.
+        :return: Updated User instance.
+        """
 
         company_name = validated_data.pop("company_name", None)
 
@@ -161,11 +192,25 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         }
 
     def validate_username(self, value):
+        """
+        Validate uniqueness of the username (case-insensitive).
+
+        :param value: The username to validate.
+        :return: The validated username string.
+        :raises serializers.ValidationError: If username is already taken.
+        """
         if User.objects.filter(username__iexact=value).exists():
             raise serializers.ValidationError("This username is already in use.")
         return value
 
     def validate_email(self, value):
+        """
+        Validate presence and uniqueness of the email address (case-insensitive).
+
+        :param value: The email to validate.
+        :return: The validated email string.
+        :raises serializers.ValidationError: If email is empty or already registered.
+        """
         if not value:
             raise serializers.ValidationError("Email is required.")
         if User.objects.filter(email__iexact=value).exists():
@@ -173,6 +218,24 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
+        """
+        Create a new user with the provided registration data, including setting the password.
+        The role field determines whether the user is a recruiter or a job seeker.
+
+        :param validated_data: Validated registration dictionary.
+        :return: Newly created User instance.
+        """
+
+        user = User(
+            username=validated_data["username"],
+            email=validated_data["email"],
+            role=validated_data["role"],
+            first_name=validated_data.get("first_name", ""),
+            last_name=validated_data.get("last_name", ""),
+        )
+        user.set_password(validated_data["password"])
+        user.save()
+        return user
         """
         Create a new user with the provided registration data, including setting the password.
         The role field determines whether the user is a recruiter or a job seeker.

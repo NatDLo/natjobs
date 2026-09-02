@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>users.serializers &#8212; NatJobs 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=6625fa76" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=039e1c02" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=af2ce170"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for users.serializers</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Serializers for registration, profile retrieval, and profile updates.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">rest_framework</span><span class="w"> </span><span class="kn">import</span> <span class="n">serializers</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">resumes.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Resume</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">resumes.serializers</span><span class="w"> </span><span class="kn">import</span> <span class="n">ResumeSerializer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">RecruiterProfile</span><span class="p">,</span> <span class="n">SeekerProfile</span><span class="p">,</span> <span class="n">User</span>
+
+
+<div class="viewcode-block" id="SeekerProfileSerializer"><a class="viewcode-back" href="../../modules.html#users.serializers.SeekerProfileSerializer">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SeekerProfileSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Serializer for job seeker profiles, including nested resume data.</span>
+<span class="sd">    The resume field is read-only and retrieves the associated Resume object for the seeker.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">resume</span> <span class="o">=</span> <span class="n">serializers</span><span class="o">.</span><span class="n">SerializerMethodField</span><span class="p">()</span>
+
+<div class="viewcode-block" id="SeekerProfileSerializer.Meta"><a class="viewcode-back" href="../../modules.html#users.serializers.SeekerProfileSerializer.Meta">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">SeekerProfile</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;resume&quot;</span><span class="p">,</span>
+        <span class="p">]</span></div>
+
+<div class="viewcode-block" id="SeekerProfileSerializer.get_resume"><a class="viewcode-back" href="../../modules.html#users.serializers.SeekerProfileSerializer.get_resume">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_resume</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve and serialize the resume associated with this seeker profile.</span>
+
+<span class="sd">        :param obj: The SeekerProfile model instance.</span>
+<span class="sd">        :return: Serialized resume dictionary or None if no resume exists.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">resume</span> <span class="o">=</span> <span class="n">Resume</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">Resume</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="n">ResumeSerializer</span><span class="p">(</span><span class="n">resume</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">)</span><span class="o">.</span><span class="n">data</span></div></div>
+
+
+<div class="viewcode-block" id="RecruiterProfileSerializer"><a class="viewcode-back" href="../../modules.html#users.serializers.RecruiterProfileSerializer">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">RecruiterProfileSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Serializer for recruiter profiles, including the company name.</span>
+<span class="sd">    The company_name field is editable for recruiters and read-only for job seekers.</span>
+<span class="sd">    &quot;&quot;&quot;</span> 
+    
+<div class="viewcode-block" id="RecruiterProfileSerializer.Meta"><a class="viewcode-back" href="../../modules.html#users.serializers.RecruiterProfileSerializer.Meta">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">RecruiterProfile</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;company_name&quot;</span><span class="p">,</span>
+        <span class="p">]</span></div></div>
+
+
+<div class="viewcode-block" id="UserPublicProfileSerializer"><a class="viewcode-back" href="../../modules.html#users.serializers.UserPublicProfileSerializer">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">UserPublicProfileSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Serializer for public user profiles, including nested seeker and recruiter profiles.</span>
+<span class="sd">    The seeker_profile and recruiter_profile fields are read-only and conditionally included based on the user&#39;s role.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">seeker_profile</span> <span class="o">=</span> <span class="n">serializers</span><span class="o">.</span><span class="n">SerializerMethodField</span><span class="p">()</span>
+    <span class="n">recruiter_profile</span> <span class="o">=</span> <span class="n">serializers</span><span class="o">.</span><span class="n">SerializerMethodField</span><span class="p">()</span>
+
+<div class="viewcode-block" id="UserPublicProfileSerializer.Meta"><a class="viewcode-back" href="../../modules.html#users.serializers.UserPublicProfileSerializer.Meta">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">User</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;username&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;first_name&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;last_name&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;role&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;seeker_profile&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;recruiter_profile&quot;</span><span class="p">,</span>
+        <span class="p">]</span></div>
+
+<div class="viewcode-block" id="UserPublicProfileSerializer.get_seeker_profile"><a class="viewcode-back" href="../../modules.html#users.serializers.UserPublicProfileSerializer.get_seeker_profile">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_seeker_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve serialized seeker profile if the user&#39;s role is &#39;seeker&#39;.</span>
+
+<span class="sd">        :param obj: The User instance.</span>
+<span class="sd">        :return: Serialized SeekerProfile dict or None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">role</span> <span class="o">!=</span> <span class="s2">&quot;seeker&quot;</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;seekerprofile&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">SeekerProfileSerializer</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">seekerprofile</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">)</span><span class="o">.</span><span class="n">data</span></div>
+
+<div class="viewcode-block" id="UserPublicProfileSerializer.get_recruiter_profile"><a class="viewcode-back" href="../../modules.html#users.serializers.UserPublicProfileSerializer.get_recruiter_profile">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_recruiter_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve serialized recruiter profile if the user&#39;s role is &#39;recruiter&#39;.</span>
+
+<span class="sd">        :param obj: The User instance.</span>
+<span class="sd">        :return: Serialized RecruiterProfile dict or None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">role</span> <span class="o">!=</span> <span class="s2">&quot;recruiter&quot;</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;recruiterprofile&quot;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">RecruiterProfileSerializer</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">recruiterprofile</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">context</span><span class="p">)</span><span class="o">.</span><span class="n">data</span></div></div>
+
+
+<div class="viewcode-block" id="UserMeSerializer"><a class="viewcode-back" href="../../modules.html#users.serializers.UserMeSerializer">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">UserMeSerializer</span><span class="p">(</span><span class="n">UserPublicProfileSerializer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Serializer for the authenticated user&#39;s own profile, including email.</span>
+<span class="sd">    Inherits from UserPublicProfileSerializer and adds the email field, which is only visible to the user themselves.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="UserMeSerializer.Meta"><a class="viewcode-back" href="../../modules.html#users.serializers.UserMeSerializer.Meta">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">(</span><span class="n">UserPublicProfileSerializer</span><span class="o">.</span><span class="n">Meta</span><span class="p">):</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="n">UserPublicProfileSerializer</span><span class="o">.</span><span class="n">Meta</span><span class="o">.</span><span class="n">fields</span> <span class="o">+</span> <span class="p">[</span>
+            <span class="s2">&quot;email&quot;</span><span class="p">,</span>
+        <span class="p">]</span></div></div>
+
+
+<div class="viewcode-block" id="UserMeUpdateSerializer"><a class="viewcode-back" href="../../modules.html#users.serializers.UserMeUpdateSerializer">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">UserMeUpdateSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Serializer for updating the authenticated user&#39;s profile information.</span>
+<span class="sd">    Allows updates to first_name, last_name, and company_name (for recruiters).</span>
+<span class="sd">    The company_name field is only editable for recruiters and is ignored for job seekers.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">company_name</span> <span class="o">=</span> <span class="n">serializers</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allow_blank</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="UserMeUpdateSerializer.Meta"><a class="viewcode-back" href="../../modules.html#users.serializers.UserMeUpdateSerializer.Meta">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">User</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;email&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;first_name&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;last_name&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;company_name&quot;</span><span class="p">,</span>
+        <span class="p">]</span></div>
+
+<div class="viewcode-block" id="UserMeUpdateSerializer.validate"><a class="viewcode-back" href="../../modules.html#users.serializers.UserMeUpdateSerializer.validate">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attrs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ensure that only recruiters can update the company_name field.</span>
+
+<span class="sd">        :param attrs: Dictionary of field inputs to validate.</span>
+<span class="sd">        :return: Validated attributes.</span>
+<span class="sd">        :raises serializers.ValidationError: If a non-recruiter attempts to set company_name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">user</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance</span>
+
+        <span class="k">if</span> <span class="n">user</span><span class="o">.</span><span class="n">role</span> <span class="o">==</span> <span class="s2">&quot;seeker&quot;</span> <span class="ow">and</span> <span class="s2">&quot;company_name&quot;</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">serializers</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">({</span>
+                <span class="s2">&quot;company_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Only recruiters can update company_name.&quot;</span>
+            <span class="p">})</span>
+
+        <span class="k">return</span> <span class="n">attrs</span></div>
+
+<div class="viewcode-block" id="UserMeUpdateSerializer.update"><a class="viewcode-back" href="../../modules.html#users.serializers.UserMeUpdateSerializer.update">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">validated_data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the user&#39;s profile information, including the company name for recruiters.</span>
+
+<span class="sd">        :param instance: Existing User instance.</span>
+<span class="sd">        :param validated_data: Validated dictionary of fields to update.</span>
+<span class="sd">        :return: Updated User instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">company_name</span> <span class="o">=</span> <span class="n">validated_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;company_name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">validated_data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="n">instance</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">instance</span><span class="o">.</span><span class="n">role</span> <span class="o">==</span> <span class="s2">&quot;recruiter&quot;</span><span class="p">:</span>
+            <span class="n">profile</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">RecruiterProfile</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span>
+                <span class="n">user</span><span class="o">=</span><span class="n">instance</span><span class="p">,</span>
+                <span class="n">defaults</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;company_name&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">},</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">company_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">profile</span><span class="o">.</span><span class="n">company_name</span> <span class="o">=</span> <span class="n">company_name</span>
+                <span class="n">profile</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">instance</span></div></div>
+
+
+<div class="viewcode-block" id="UserRegisterSerializer"><a class="viewcode-back" href="../../modules.html#users.serializers.UserRegisterSerializer">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">UserRegisterSerializer</span><span class="p">(</span><span class="n">serializers</span><span class="o">.</span><span class="n">ModelSerializer</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Serializer for user registration, including password handling.</span>
+<span class="sd">    The password field is write-only and is used to create a new user with the specified role (recruiter or seeker).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">password</span> <span class="o">=</span> <span class="n">serializers</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">write_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="UserRegisterSerializer.Meta"><a class="viewcode-back" href="../../modules.html#users.serializers.UserRegisterSerializer.Meta">[docs]</a>    <span class="k">class</span><span class="w"> </span><span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">User</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;username&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;email&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;password&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;first_name&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;last_name&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;role&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="n">extra_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;email&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;allow_blank&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span>
+        <span class="p">}</span></div>
+
+<div class="viewcode-block" id="UserRegisterSerializer.validate_username"><a class="viewcode-back" href="../../modules.html#users.serializers.UserRegisterSerializer.validate_username">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">validate_username</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validate uniqueness of the username (case-insensitive).</span>
+
+<span class="sd">        :param value: The username to validate.</span>
+<span class="sd">        :return: The validated username string.</span>
+<span class="sd">        :raises serializers.ValidationError: If username is already taken.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">username__iexact</span><span class="o">=</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">serializers</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">(</span><span class="s2">&quot;This username is already in use.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span></div>
+
+<div class="viewcode-block" id="UserRegisterSerializer.validate_email"><a class="viewcode-back" href="../../modules.html#users.serializers.UserRegisterSerializer.validate_email">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">validate_email</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validate presence and uniqueness of the email address (case-insensitive).</span>
+
+<span class="sd">        :param value: The email to validate.</span>
+<span class="sd">        :return: The validated email string.</span>
+<span class="sd">        :raises serializers.ValidationError: If email is empty or already registered.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">serializers</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">(</span><span class="s2">&quot;Email is required.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">email__iexact</span><span class="o">=</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">serializers</span><span class="o">.</span><span class="n">ValidationError</span><span class="p">(</span><span class="s2">&quot;This email is already in use.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span></div>
+
+<div class="viewcode-block" id="UserRegisterSerializer.create"><a class="viewcode-back" href="../../modules.html#users.serializers.UserRegisterSerializer.create">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">validated_data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a new user with the provided registration data, including setting the password.</span>
+<span class="sd">        The role field determines whether the user is a recruiter or a job seeker.</span>
+
+<span class="sd">        :param validated_data: Validated registration dictionary.</span>
+<span class="sd">        :return: Newly created User instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span>
+            <span class="n">username</span><span class="o">=</span><span class="n">validated_data</span><span class="p">[</span><span class="s2">&quot;username&quot;</span><span class="p">],</span>
+            <span class="n">email</span><span class="o">=</span><span class="n">validated_data</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">],</span>
+            <span class="n">role</span><span class="o">=</span><span class="n">validated_data</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">],</span>
+            <span class="n">first_name</span><span class="o">=</span><span class="n">validated_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;first_name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+            <span class="n">last_name</span><span class="o">=</span><span class="n">validated_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;last_name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">set_password</span><span class="p">(</span><span class="n">validated_data</span><span class="p">[</span><span class="s2">&quot;password&quot;</span><span class="p">])</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">user</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a new user with the provided registration data, including setting the password.</span>
+<span class="sd">        The role field determines whether the user is a recruiter or a job seeker.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">user</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span>
+            <span class="n">username</span><span class="o">=</span><span class="n">validated_data</span><span class="p">[</span><span class="s2">&quot;username&quot;</span><span class="p">],</span>
+            <span class="n">email</span><span class="o">=</span><span class="n">validated_data</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">],</span>
+            <span class="n">role</span><span class="o">=</span><span class="n">validated_data</span><span class="p">[</span><span class="s2">&quot;role&quot;</span><span class="p">],</span>
+            <span class="n">first_name</span><span class="o">=</span><span class="n">validated_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;first_name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+            <span class="n">last_name</span><span class="o">=</span><span class="n">validated_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;last_name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">set_password</span><span class="p">(</span><span class="n">validated_data</span><span class="p">[</span><span class="s2">&quot;password&quot;</span><span class="p">])</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">user</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">NatJobs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">System Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture.html">Architecture &amp; Technologies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Backend Modules &amp; API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2026, NatJobs Team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

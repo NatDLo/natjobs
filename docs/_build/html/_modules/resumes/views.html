@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>resumes.views &#8212; NatJobs 1.0.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=6625fa76" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css?v=039e1c02" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=af2ce170"></script>
+    <script src="../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for resumes.views</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Seeker-only resume CRUD and nested resource management endpoints.</span>
+<span class="sd">Shared role gate for all resume endpoints via SeekerOnlyMixin.</span>
+<span class="sd">Prevent duplicate resumes per user in ResumeListCreateView.</span>
+<span class="sd">Always scope resume and nested resource queries to the authenticated user to ensure data isolation and security.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">django.shortcuts</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_object_or_404</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rest_framework</span><span class="w"> </span><span class="kn">import</span> <span class="n">generics</span><span class="p">,</span> <span class="n">permissions</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rest_framework.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">PermissionDenied</span><span class="p">,</span> <span class="n">ValidationError</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Resume</span><span class="p">,</span> <span class="n">Skill</span><span class="p">,</span> <span class="n">Language</span><span class="p">,</span> <span class="n">Experience</span><span class="p">,</span> <span class="n">Education</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.serializers</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ResumeSerializer</span><span class="p">,</span>
+    <span class="n">SkillSerializer</span><span class="p">,</span>
+    <span class="n">LanguageSerializer</span><span class="p">,</span>
+    <span class="n">ExperienceSerializer</span><span class="p">,</span>
+    <span class="n">EducationSerializer</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="SeekerOnlyMixin"><a class="viewcode-back" href="../../modules.html#resumes.views.SeekerOnlyMixin">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SeekerOnlyMixin</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mixin to restrict access to seekers only for resume-related views.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SeekerOnlyMixin.initial"><a class="viewcode-back" href="../../modules.html#resumes.views.SeekerOnlyMixin.initial">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">initial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">initial</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="o">.</span><span class="n">role</span> <span class="o">!=</span> <span class="s2">&quot;seeker&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">PermissionDenied</span><span class="p">(</span><span class="s2">&quot;Only seekers can manage resumes.&quot;</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="ResumeListCreateView"><a class="viewcode-back" href="../../modules.html#resumes.views.ResumeListCreateView">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ResumeListCreateView</span><span class="p">(</span><span class="n">SeekerOnlyMixin</span><span class="p">,</span> <span class="n">generics</span><span class="o">.</span><span class="n">ListCreateAPIView</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    List and create resume for the authenticated seeker.</span>
+<span class="sd">    Each seeker can only have one resume, enforced in perform_create.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">serializer_class</span> <span class="o">=</span> <span class="n">ResumeSerializer</span>
+    <span class="n">permission_classes</span> <span class="o">=</span> <span class="p">[</span><span class="n">permissions</span><span class="o">.</span><span class="n">IsAuthenticated</span><span class="p">]</span>
+
+<div class="viewcode-block" id="ResumeListCreateView.get_queryset"><a class="viewcode-back" href="../../modules.html#resumes.views.ResumeListCreateView.get_queryset">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Resume</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">prefetch_related</span><span class="p">(</span>
+            <span class="s2">&quot;skills&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;languages&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;experiences&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;education&quot;</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="ResumeListCreateView.perform_create"><a class="viewcode-back" href="../../modules.html#resumes.views.ResumeListCreateView.perform_create">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">perform_create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serializer</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">Resume</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">({</span><span class="s2">&quot;detail&quot;</span><span class="p">:</span> <span class="s2">&quot;You already have a resume.&quot;</span><span class="p">})</span>
+
+        <span class="n">serializer</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="ResumeMeView"><a class="viewcode-back" href="../../modules.html#resumes.views.ResumeMeView">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ResumeMeView</span><span class="p">(</span><span class="n">SeekerOnlyMixin</span><span class="p">,</span> <span class="n">generics</span><span class="o">.</span><span class="n">RetrieveUpdateAPIView</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve and update the authenticated seeker&#39;s resume.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">serializer_class</span> <span class="o">=</span> <span class="n">ResumeSerializer</span>
+    <span class="n">permission_classes</span> <span class="o">=</span> <span class="p">[</span><span class="n">permissions</span><span class="o">.</span><span class="n">IsAuthenticated</span><span class="p">]</span>
+
+<div class="viewcode-block" id="ResumeMeView.get_object"><a class="viewcode-back" href="../../modules.html#resumes.views.ResumeMeView.get_object">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">get_object_or_404</span><span class="p">(</span>
+            <span class="n">Resume</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">prefetch_related</span><span class="p">(</span>
+                <span class="s2">&quot;skills&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;languages&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;experiences&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;education&quot;</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">user</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span>
+        <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="ResumeDetailView"><a class="viewcode-back" href="../../modules.html#resumes.views.ResumeDetailView">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ResumeDetailView</span><span class="p">(</span><span class="n">SeekerOnlyMixin</span><span class="p">,</span> <span class="n">generics</span><span class="o">.</span><span class="n">RetrieveUpdateDestroyAPIView</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve, update, and delete the authenticated seeker&#39;s resume.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">serializer_class</span> <span class="o">=</span> <span class="n">ResumeSerializer</span>
+    <span class="n">permission_classes</span> <span class="o">=</span> <span class="p">[</span><span class="n">permissions</span><span class="o">.</span><span class="n">IsAuthenticated</span><span class="p">]</span>
+
+<div class="viewcode-block" id="ResumeDetailView.get_queryset"><a class="viewcode-back" href="../../modules.html#resumes.views.ResumeDetailView.get_queryset">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ensure we only operate on the authenticated seeker&#39;s resume.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">Resume</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">prefetch_related</span><span class="p">(</span>
+            <span class="s2">&quot;skills&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;languages&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;experiences&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;education&quot;</span><span class="p">,</span>
+        <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="SkillListCreateView"><a class="viewcode-back" href="../../modules.html#resumes.views.SkillListCreateView">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SkillListCreateView</span><span class="p">(</span><span class="n">SeekerOnlyMixin</span><span class="p">,</span> <span class="n">generics</span><span class="o">.</span><span class="n">ListCreateAPIView</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    List and create skills for the authenticated seeker&#39;s resume.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">serializer_class</span> <span class="o">=</span> <span class="n">SkillSerializer</span>
+    <span class="n">permission_classes</span> <span class="o">=</span> <span class="p">[</span><span class="n">permissions</span><span class="o">.</span><span class="n">IsAuthenticated</span><span class="p">]</span>
+
+<div class="viewcode-block" id="SkillListCreateView.get_resume"><a class="viewcode-back" href="../../modules.html#resumes.views.SkillListCreateView.get_resume">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_resume</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve the authenticated seeker&#39;s resume based on the resume_id URL parameter.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">get_object_or_404</span><span class="p">(</span>
+            <span class="n">Resume</span><span class="p">,</span>
+            <span class="n">pk</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;resume_id&quot;</span><span class="p">],</span>
+            <span class="n">user</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="SkillListCreateView.get_queryset"><a class="viewcode-back" href="../../modules.html#resumes.views.SkillListCreateView.get_queryset">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ensure we only operate on skills belonging to the authenticated seeker&#39;s resume.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">Skill</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">resume</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_resume</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="SkillListCreateView.perform_create"><a class="viewcode-back" href="../../modules.html#resumes.views.SkillListCreateView.perform_create">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">perform_create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serializer</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Automatically associate the new skill with the authenticated seeker&#39;s resume.</span>
+<span class="sd">        :var serializer: The serializer instance for the skill being created.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">serializer</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">resume</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_resume</span><span class="p">())</span></div></div>
+
+
+<div class="viewcode-block" id="SkillUpdateView"><a class="viewcode-back" href="../../modules.html#resumes.views.SkillUpdateView">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">SkillUpdateView</span><span class="p">(</span><span class="n">SeekerOnlyMixin</span><span class="p">,</span> <span class="n">generics</span><span class="o">.</span><span class="n">RetrieveUpdateDestroyAPIView</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve, update, and delete a skill for the authenticated seeker&#39;s resume.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">serializer_class</span> <span class="o">=</span> <span class="n">SkillSerializer</span>
+    <span class="n">permission_classes</span> <span class="o">=</span> <span class="p">[</span><span class="n">permissions</span><span class="o">.</span><span class="n">IsAuthenticated</span><span class="p">]</span>
+
+<div class="viewcode-block" id="SkillUpdateView.get_queryset"><a class="viewcode-back" href="../../modules.html#resumes.views.SkillUpdateView.get_queryset">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ensure we only operate on skills belonging to the authenticated seeker&#39;s resume.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">Skill</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">resume__user</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="LanguageListCreateView"><a class="viewcode-back" href="../../modules.html#resumes.views.LanguageListCreateView">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">LanguageListCreateView</span><span class="p">(</span><span class="n">SeekerOnlyMixin</span><span class="p">,</span> <span class="n">generics</span><span class="o">.</span><span class="n">ListCreateAPIView</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    List and create languages for the authenticated seeker&#39;s resume.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">serializer_class</span> <span class="o">=</span> <span class="n">LanguageSerializer</span>
+    <span class="n">permission_classes</span> <span class="o">=</span> <span class="p">[</span><span class="n">permissions</span><span class="o">.</span><span class="n">IsAuthenticated</span><span class="p">]</span>
+
+<div class="viewcode-block" id="LanguageListCreateView.get_resume"><a class="viewcode-back" href="../../modules.html#resumes.views.LanguageListCreateView.get_resume">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_resume</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve the authenticated seeker&#39;s resume based on the resume_id URL parameter.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">get_object_or_404</span><span class="p">(</span>
+            <span class="n">Resume</span><span class="p">,</span>
+            <span class="n">pk</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;resume_id&quot;</span><span class="p">],</span>
+            <span class="n">user</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="LanguageListCreateView.get_queryset"><a class="viewcode-back" href="../../modules.html#resumes.views.LanguageListCreateView.get_queryset">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ensure we only operate on languages belonging to the authenticated seeker&#39;s resume.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">Language</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">resume</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_resume</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="LanguageListCreateView.perform_create"><a class="viewcode-back" href="../../modules.html#resumes.views.LanguageListCreateView.perform_create">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">perform_create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serializer</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Automatically associate the new language with the authenticated seeker&#39;s resume.</span>
+<span class="sd">        :var serializer: The serializer instance for the language being created.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">serializer</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">resume</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_resume</span><span class="p">())</span></div></div>
+
+
+<div class="viewcode-block" id="LanguageUpdateView"><a class="viewcode-back" href="../../modules.html#resumes.views.LanguageUpdateView">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">LanguageUpdateView</span><span class="p">(</span><span class="n">SeekerOnlyMixin</span><span class="p">,</span> <span class="n">generics</span><span class="o">.</span><span class="n">RetrieveUpdateDestroyAPIView</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve, update, and delete a language for the authenticated seeker&#39;s resume.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">serializer_class</span> <span class="o">=</span> <span class="n">LanguageSerializer</span>
+    <span class="n">permission_classes</span> <span class="o">=</span> <span class="p">[</span><span class="n">permissions</span><span class="o">.</span><span class="n">IsAuthenticated</span><span class="p">]</span>
+
+<div class="viewcode-block" id="LanguageUpdateView.get_queryset"><a class="viewcode-back" href="../../modules.html#resumes.views.LanguageUpdateView.get_queryset">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ensure we only operate on languages belonging to the authenticated seeker&#39;s resume.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">Language</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">resume__user</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="ExperienceListCreateView"><a class="viewcode-back" href="../../modules.html#resumes.views.ExperienceListCreateView">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ExperienceListCreateView</span><span class="p">(</span><span class="n">SeekerOnlyMixin</span><span class="p">,</span> <span class="n">generics</span><span class="o">.</span><span class="n">ListCreateAPIView</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    List and create work experience entries for the authenticated seeker&#39;s resume.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">serializer_class</span> <span class="o">=</span> <span class="n">ExperienceSerializer</span>
+    <span class="n">permission_classes</span> <span class="o">=</span> <span class="p">[</span><span class="n">permissions</span><span class="o">.</span><span class="n">IsAuthenticated</span><span class="p">]</span>
+
+<div class="viewcode-block" id="ExperienceListCreateView.get_resume"><a class="viewcode-back" href="../../modules.html#resumes.views.ExperienceListCreateView.get_resume">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_resume</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve the authenticated seeker&#39;s resume based on the resume_id URL parameter.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">get_object_or_404</span><span class="p">(</span>
+            <span class="n">Resume</span><span class="p">,</span>
+            <span class="n">pk</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;resume_id&quot;</span><span class="p">],</span>
+            <span class="n">user</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="ExperienceListCreateView.get_queryset"><a class="viewcode-back" href="../../modules.html#resumes.views.ExperienceListCreateView.get_queryset">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ensure we only operate on experience entries belonging to the authenticated seeker&#39;s resume.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">Experience</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">resume</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_resume</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="ExperienceListCreateView.perform_create"><a class="viewcode-back" href="../../modules.html#resumes.views.ExperienceListCreateView.perform_create">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">perform_create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serializer</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Automatically associate the new experience entry with the authenticated seeker&#39;s resume.</span>
+<span class="sd">        :var serializer: The serializer instance for the experience entry being created.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">serializer</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">resume</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_resume</span><span class="p">())</span></div></div>
+
+
+<div class="viewcode-block" id="ExperienceUpdateView"><a class="viewcode-back" href="../../modules.html#resumes.views.ExperienceUpdateView">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">ExperienceUpdateView</span><span class="p">(</span><span class="n">SeekerOnlyMixin</span><span class="p">,</span> <span class="n">generics</span><span class="o">.</span><span class="n">RetrieveUpdateDestroyAPIView</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve, update, and delete a work experience entry for the authenticated seeker&#39;s resume.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">serializer_class</span> <span class="o">=</span> <span class="n">ExperienceSerializer</span>
+    <span class="n">permission_classes</span> <span class="o">=</span> <span class="p">[</span><span class="n">permissions</span><span class="o">.</span><span class="n">IsAuthenticated</span><span class="p">]</span>
+
+<div class="viewcode-block" id="ExperienceUpdateView.get_queryset"><a class="viewcode-back" href="../../modules.html#resumes.views.ExperienceUpdateView.get_queryset">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ensure we only operate on experience entries belonging to the authenticated seeker&#39;s resume.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">Experience</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">resume__user</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="EducationListCreateView"><a class="viewcode-back" href="../../modules.html#resumes.views.EducationListCreateView">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">EducationListCreateView</span><span class="p">(</span><span class="n">SeekerOnlyMixin</span><span class="p">,</span> <span class="n">generics</span><span class="o">.</span><span class="n">ListCreateAPIView</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    List and create education entries for the authenticated seeker&#39;s resume.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">serializer_class</span> <span class="o">=</span> <span class="n">EducationSerializer</span>
+    <span class="n">permission_classes</span> <span class="o">=</span> <span class="p">[</span><span class="n">permissions</span><span class="o">.</span><span class="n">IsAuthenticated</span><span class="p">]</span>
+
+<div class="viewcode-block" id="EducationListCreateView.get_resume"><a class="viewcode-back" href="../../modules.html#resumes.views.EducationListCreateView.get_resume">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_resume</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieve the authenticated seeker&#39;s resume based on the resume_id URL parameter.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">get_object_or_404</span><span class="p">(</span>
+            <span class="n">Resume</span><span class="p">,</span>
+            <span class="n">pk</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;resume_id&quot;</span><span class="p">],</span>
+            <span class="n">user</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="EducationListCreateView.get_queryset"><a class="viewcode-back" href="../../modules.html#resumes.views.EducationListCreateView.get_queryset">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ensure we only operate on education entries belonging to the authenticated seeker&#39;s resume.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">Education</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">resume</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_resume</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="EducationListCreateView.perform_create"><a class="viewcode-back" href="../../modules.html#resumes.views.EducationListCreateView.perform_create">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">perform_create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serializer</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Automatically associate the new education entry with the authenticated seeker&#39;s resume.</span>
+<span class="sd">        :var serializer: The serializer instance for the education entry being created.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">serializer</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">resume</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_resume</span><span class="p">())</span></div></div>
+
+
+<div class="viewcode-block" id="EducationUpdateView"><a class="viewcode-back" href="../../modules.html#resumes.views.EducationUpdateView">[docs]</a><span class="k">class</span><span class="w"> </span><span class="nc">EducationUpdateView</span><span class="p">(</span><span class="n">SeekerOnlyMixin</span><span class="p">,</span> <span class="n">generics</span><span class="o">.</span><span class="n">RetrieveUpdateDestroyAPIView</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Retrieve, update, and delete an education entry for the authenticated seeker&#39;s resume.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">serializer_class</span> <span class="o">=</span> <span class="n">EducationSerializer</span>
+    <span class="n">permission_classes</span> <span class="o">=</span> <span class="p">[</span><span class="n">permissions</span><span class="o">.</span><span class="n">IsAuthenticated</span><span class="p">]</span>
+
+<div class="viewcode-block" id="EducationUpdateView.get_queryset"><a class="viewcode-back" href="../../modules.html#resumes.views.EducationUpdateView.get_queryset">[docs]</a>    <span class="k">def</span><span class="w"> </span><span class="nf">get_queryset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ensure we only operate on education entries belonging to the authenticated seeker&#39;s resume.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">return</span> <span class="n">Education</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">resume__user</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">user</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">NatJobs</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">System Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../architecture.html">Architecture &amp; Technologies</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Backend Modules &amp; API Reference</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2026, NatJobs Team.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 7.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.13</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

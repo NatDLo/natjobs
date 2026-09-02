@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, convertToParamMap } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
 import { of } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 
@@ -13,9 +14,11 @@ describe('PublicProfileComponent', () => {
 		await TestBed.configureTestingModule({
 			imports: [PublicProfileComponent],
 			providers: [
+				provideHttpClient(),
 				{
 					provide: ActivatedRoute,
 					useValue: {
+						paramMap: of(convertToParamMap({ id: '1' })),
 						snapshot: {
 							params: {
 								id: '1',
@@ -26,6 +29,7 @@ describe('PublicProfileComponent', () => {
 				{
 					provide: AuthService,
 					useValue: {
+						user: () => null,
 						getPublicProfile: () => of({ id: 1, username: 'test', role: 'seeker' }),
 					},
 				},

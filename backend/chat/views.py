@@ -121,6 +121,13 @@ class MarkConversationReadView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
+        """
+        Mark all messages sent by the other party in this conversation as read.
+
+        :param request: The incoming HTTP request.
+        :param pk: Conversation ID.
+        :return: Response with status 'ok'.
+        """
         try:
             conversation = Conversation.objects.get(pk=pk)
         except Conversation.DoesNotExist:
@@ -140,6 +147,12 @@ class UnreadCountView(generics.GenericAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
+        """
+        Calculate total unread messages across all conversations of the authenticated user.
+
+        :param request: The incoming HTTP request.
+        :return: Response containing 'unread_count' integer.
+        """
         user = request.user
         unread_total = Message.objects.filter(
             conversation__in=Conversation.objects.filter(Q(recruiter=user) | Q(seeker=user)),

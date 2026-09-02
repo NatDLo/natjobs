@@ -7,8 +7,11 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/)
 [![Docker](https://img.shields.io/badge/Docker_Compose-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
+[![Documentation Status](https://img.shields.io/badge/docs-Read_the_Docs-8CA1AF?style=for-the-badge&logo=read-the-docs&logoColor=white)](https://natjobs.readthedocs.io/)
 
 **NatJobs** is a modern full-stack recruitment web platform that seamlessly connects **Job Seekers** and **Recruiters** with end-to-end application tracking and real-time WebSocket communication.
+
+📖 **Documentation:** Read the full documentation on [Read the Docs](https://natjobs.readthedocs.io/).
 
 ---
 
@@ -146,6 +149,23 @@ Base URL: `/api`
 
 ---
 
-## 📄 License
+## 📚 Sphinx & Read the Docs Documentation
+
+Full project and API documentation is hosted on **[Read the Docs](https://natjobs.readthedocs.io/)**.
+
+To build and view the Sphinx documentation locally:
+
+```bash
+# Build documentation locally (from repository root):
+python -m sphinx -b html docs docs/_build/html
+```
+
+Configuration files:
+- `docs/conf.py` - Sphinx configuration and Django environment setup
+- `.readthedocs.yaml` - Read the Docs cloud build configuration
+
+---
+
+## �📄 License
 
 This project is licensed under the MIT License.

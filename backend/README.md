@@ -104,5 +104,16 @@ python manage.py test users jobs resumes applications chat
 
 ---
 
-## 📄 License
+## � Documentation
+
+The backend API and architecture are documented with Sphinx and hosted on **[Read the Docs](https://natjobs.readthedocs.io/)**.
+
+To build documentation locally:
+```bash
+python -m sphinx -b html ../docs ../docs/_build/html
+```
+
+---
+
+## �📄 License
 MIT

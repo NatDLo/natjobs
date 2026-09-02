@@ -63,11 +63,23 @@ class JobDetailView(generics.RetrieveUpdateDestroyAPIView):
         return Job.objects.all()
 
     def perform_update(self, serializer):
+        """
+        Ensure only the recruiter who created the job can update it.
+
+        :param serializer: The JobSerializer instance with updated data.
+        :raises PermissionDenied: If user is not the job owner.
+        """
         if self.request.user.role != "recruiter" or serializer.instance.recruiter != self.request.user:
             raise PermissionDenied("You can only edit your own jobs.")
         serializer.save()
 
     def perform_destroy(self, instance):
+        """
+        Ensure only the recruiter who created the job can delete it.
+
+        :param instance: The Job instance to delete.
+        :raises PermissionDenied: If user is not the job owner.
+        """
         if self.request.user.role != "recruiter" or instance.recruiter != self.request.user:
             raise PermissionDenied("You can only delete your own jobs.")
         instance.delete()

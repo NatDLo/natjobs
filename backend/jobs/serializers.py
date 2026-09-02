@@ -28,12 +28,24 @@ class JobSerializer(serializers.ModelSerializer):
         read_only_fields = ["recruiter", "created_at"]
 
     def get_has_applied(self, obj):
+        """
+        Check if the current authenticated seeker has already applied to this job.
+
+        :param obj: The Job model instance.
+        :return: True if the authenticated seeker applied, False otherwise.
+        """
         request = self.context.get("request")
         if request and request.user.is_authenticated and request.user.role == "seeker":
             return obj.applications.filter(seeker=request.user).exists()
         return False
 
     def get_application_status(self, obj):
+        """
+        Retrieve the application status string for the current authenticated seeker.
+
+        :param obj: The Job model instance.
+        :return: Application status string or None if not applied.
+        """
         request = self.context.get("request")
         if request and request.user.is_authenticated and request.user.role == "seeker":
             app = obj.applications.filter(seeker=request.user).first()

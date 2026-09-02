@@ -103,6 +103,8 @@ class ApplicationUpdateStatusView(generics.UpdateAPIView):
     def perform_update(self, serializer):
         """
         Update the application status and send a notification message in chat on any status change.
+
+        :param serializer: ApplicationStatusUpdateSerializer instance.
         """
         prev_status = serializer.instance.status
         instance = serializer.save()

@@ -1,10 +1,10 @@
-# 🎨 NatJobs Frontend - Angular 21 Client
+# NatJobs Frontend - Angular 21 Client
 
 Modern, reactive single-page application (SPA) for the **NatJobs** recruitment platform.
 
 ---
 
-## 🚀 Key Features
+## Key Features
 
 - **Angular 21 Standalone Components**: Modern component architecture without NgModules.
 - **Signal-Driven & Reactive UI**: Built with Angular Signals and RxJS observables for snappy, reliable state management.
@@ -15,7 +15,7 @@ Modern, reactive single-page application (SPA) for the **NatJobs** recruitment p
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Framework**: Angular 21
 - **Language**: TypeScript 5.9
@@ -25,7 +25,7 @@ Modern, reactive single-page application (SPA) for the **NatJobs** recruitment p
 
 ---
 
-## 🧭 Application Routes
+## Application Routes
 
 ### Public Routes
 - `/auth/login` - Candidate & Recruiter sign-in
@@ -46,7 +46,7 @@ Modern, reactive single-page application (SPA) for the **NatJobs** recruitment p
 
 ---
 
-## 💻 Local Development
+## Local Development
 
 ### Prerequisites
 - Node.js 20+
@@ -63,7 +63,7 @@ npm start
 
 Application URL: `http://localhost:4200`
 
-> ℹ️ **Proxy:** API (`/api`) and WebSocket (`/ws`) requests are automatically proxied to `http://127.0.0.1:8000` via `proxy.conf.json`.
+> **Proxy:** API (`/api`) and WebSocket (`/ws`) requests are automatically proxied to `http://127.0.0.1:8000` via `proxy.conf.json`.
 
 ### Building for Production
 ```bash
@@ -72,5 +72,5 @@ npm run build
 
 ---
 
-## 📄 License
+## License
 MIT

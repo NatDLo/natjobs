@@ -1,21 +1,12 @@
-# 💼 NatJobs - Full Stack Recruitment & Real-Time Platform
-
-[![Django](https://img.shields.io/badge/Django-4.2-092E20?style=for-the-badge&logo=django&logoColor=white)](https://www.djangoproject.com/)
-[![Django REST Framework](https://img.shields.io/badge/DRF-3.15-red?style=for-the-badge&logo=django)](https://www.django-rest-framework.org/)
-[![Angular](https://img.shields.io/badge/Angular-21-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
-[![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/)
-[![Docker](https://img.shields.io/badge/Docker_Compose-Enabled-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
-[![Documentation Status](https://img.shields.io/badge/docs-Read_the_Docs-8CA1AF?style=for-the-badge&logo=read-the-docs&logoColor=white)](https://natjobs.readthedocs.io/)
+#  NatJobs - Full Stack Recruitment & Real-Time Platform
 
 **NatJobs** is a modern full-stack recruitment web platform that seamlessly connects **Job Seekers** and **Recruiters** with end-to-end application tracking and real-time WebSocket communication.
 
-📖 **Documentation:** Read the full documentation on [Read the Docs](https://natjobs.readthedocs.io/).
+ **Documentation:** Read the full documentation on [Read the Docs](https://natjobs.readthedocs.io/).
 
 ---
 
-## 🚀 Key Highlights & Architecture
+##  Key Highlights & Architecture
 
 - **Role-Based Workflows**: Distinct interfaces and capabilities tailored for **Job Seekers** and **Recruiters**.
 - **Real-Time Communication**: Live bidirectional chat powered by **Django Channels**, **WebSockets**, and **Redis Channel Layers**, complete with unread notification badges and auto-messaging upon application status updates.
@@ -25,21 +16,21 @@
 
 ---
 
-## ✨ Features
+## Features
 
-### 🏢 Recruiter Experience
+###  Recruiter Experience
 - **Job Management**: Create, edit, pause, and close job postings.
 - **Applicant Tracking**: Review candidate profiles, full resumes, and change status (`reviewing`, `interview`, `accepted`, `rejected`).
 - **Automated Chat Notifications**: Status changes instantly notify candidates via real-time chat.
 - **Direct Messaging**: Chat in real-time with candidates directly from their public profiles or applicant views.
 
-### 👤 Job Seeker Experience
+###  Job Seeker Experience
 - **Job Discovery**: Explore active job openings with immediate status visibility.
 - **Interactive CV Builder**: Manage complete resume information (work experience, education, skills with proficiency levels, and languages).
 - **One-Click Application**: Apply to open jobs with duplicate prevention and live application tracking badges (`Applied`, `Reviewing`, etc.).
 - **Recruiter Contact**: Reach out to recruiters directly via profile or job detail pages.
 
-### 💬 Real-Time Chat & Notification System
+###  Real-Time Chat & Notification System
 - Instant messaging via WebSockets (`/ws/chat/{id}/`).
 - Live unread message counters with visual badge indicator on the floating chat widget.
 - Real contact names and company info (no generic IDs).
@@ -47,7 +38,7 @@
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 | Layer | Technologies |
 |---|---|
@@ -58,7 +49,7 @@
 
 ---
 
-## 🐳 Running with Docker (Recommended)
+##  Running with Docker (Recommended)
 
 To start the full stack (PostgreSQL + Redis + Django Backend + Angular Frontend):
 
@@ -73,7 +64,7 @@ docker compose up --build
 
 ---
 
-## 💻 Local Development Setup
+##  Local Development Setup
 
 ### 1. Prerequisites
 - Python 3.8+ (3.10+ recommended)
@@ -104,7 +95,7 @@ npm start
 
 ---
 
-## 🧪 Testing & Code Quality
+##  Testing & Code Quality
 
 ### Backend Tests
 ```bash
@@ -125,7 +116,7 @@ npm run build
 
 ---
 
-## 🌐 API Overview
+##  API Overview
 
 Base URL: `/api`
 
@@ -149,7 +140,7 @@ Base URL: `/api`
 
 ---
 
-## 📚 Sphinx & Read the Docs Documentation
+##  Sphinx & Read the Docs Documentation
 
 Full project and API documentation is hosted on **[Read the Docs](https://natjobs.readthedocs.io/)**.
 
@@ -166,6 +157,6 @@ Configuration files:
 
 ---
 
-## �📄 License
+##  License
 
 This project is licensed under the MIT License.

@@ -1,27 +1,36 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath('../backend'))
+sys.path.insert(0, os.path.abspath("../backend"))
 
-project = 'NatJobs'
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
 
-copyright = '2026, NatJobs Team'
+import django
 
-author = 'NatJobs Team'
+django.setup()
 
-release = '1.0.0'
+
+project = "NatJobs"
+copyright = "2026, NatJobs Team"
+author = "NatJobs Team"
+release = "1.0.0"
+
 
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx.ext.napoleon',
-    'sphinx.ext.viewcode',
-    'sphinx.ext.coverage',
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.coverage",
 ]
 
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = [
+    "_build",
+    "Thumbs.db",
+    ".DS_Store",
+]
 
-html_theme = 'sphinx_rtd_theme'
+html_theme = "sphinx_rtd_theme"
 
-html_static_path = ['_static']
+html_static_path = ["_static"]

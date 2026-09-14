@@ -1,21 +1,8 @@
-# ⚙️ NatJobs Backend API & WebSocket Service
+#  NatJobs Backend API & WebSocket Service
 
 Django REST Framework & Django Channels backend powering the **NatJobs** recruitment platform.
 
----
-
-## 🛠️ Tech Stack & Architecture
-
-- **Framework**: Django 4.2 & Django REST Framework (DRF)
-- **Authentication**: SimpleJWT (JWT tokens: access + refresh)
-- **Real-Time Communication**: Django Channels 4 & Daphne ASGI Server
-- **Message Broker / Cache**: Redis 7 / Channel Layers
-- **Database**: PostgreSQL 15 (Docker) / SQLite (Local fallback)
-- **Testing**: Django Test Suite & Coverage
-
----
-
-## 📁 App Structure
+##  App Structure
 
 ```text
 backend/
@@ -30,21 +17,21 @@ backend/
 
 ---
 
-## 📡 API Reference
+##  API Reference
 
 Base URL: `/api`
 
-### 🔑 Authentication
+###  Authentication
 - `POST /api/login/` - Authenticate and retrieve JWT token pair
 - `POST /api/refresh/` - Refresh JWT access token
 
-### 👥 Users
+###  Users
 - `POST /api/users/register/` - Register account (`seeker` or `recruiter`)
 - `GET /api/users/me/` - Retrieve own profile
 - `PATCH /api/users/me/` - Update profile & recruiter company details
 - `GET /api/users/{id}/` - Retrieve public user profile and public CV
 
-### 💼 Jobs
+###  Jobs
 - `GET /api/jobs/` - List open jobs (or recruiter's own jobs)
 - `POST /api/jobs/` - Publish a new job (Recruiters only)
 - `GET /api/jobs/{id}/` - Retrieve job posting details
@@ -52,19 +39,19 @@ Base URL: `/api`
 - `DELETE /api/jobs/{id}/` - Remove job posting (Owner recruiter only)
 - `GET /api/jobs/{id}/applications/` - List candidate applications for this job
 
-### 📄 Resumes & Candidate CVs (Seeker Only)
+###  Resumes & Candidate CVs (Seeker Only)
 - `POST /api/resumes/` - Create candidate resume
 - `GET /api/resumes/me/` - Get candidate's own resume
 - `PATCH /api/resumes/me/` - Update resume summary and availability
 - Nested resources for skills, languages, experiences, and education under `/api/resumes/...`
 
-### 📝 Applications
+###  Applications
 - `GET /api/applications/` - List candidate's submitted applications
 - `POST /api/applications/` - Submit application for an open job (Includes resume snapshot)
 - `GET /api/applications/{id}/` - View application details
 - `PATCH /api/applications/{id}/status/` - Update status (`reviewing`, `interview`, `accepted`, `rejected`) + triggers automated chat notification
 
-### 💬 Real-Time Chat & Messages
+###  Real-Time Chat & Messages
 - `GET /api/chat/conversations/` - List all active conversations with unread counter and contact details
 - `POST /api/chat/conversations/create/` - Create or retrieve 1-on-1 chat room (`user_id` or `recruiter`/`seeker`)
 - `GET /api/chat/conversations/{id}/` - View conversation details
@@ -73,7 +60,7 @@ Base URL: `/api`
 
 ---
 
-## 🔌 WebSocket Specification
+##  WebSocket Specification
 
 **Endpoint:** `ws://<host>/ws/chat/<conversation_id>/?token=<JWT_ACCESS_TOKEN>`
 
@@ -84,7 +71,7 @@ Base URL: `/api`
 
 ---
 
-## 💻 Running Backend Locally
+##  Running Backend Locally
 
 ```bash
 # 1. Activate virtual environment
@@ -104,7 +91,7 @@ python manage.py test users jobs resumes applications chat
 
 ---
 
-## � Documentation
+##  Documentation
 
 The backend API and architecture are documented with Sphinx and hosted on **[Read the Docs](https://natjobs.readthedocs.io/)**.
 
@@ -115,5 +102,5 @@ python -m sphinx -b html ../docs ../docs/_build/html
 
 ---
 
-## �📄 License
+##  License
 MIT
